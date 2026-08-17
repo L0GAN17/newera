@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>eInvoice - Dodávateľské faktúry</title>
+<style>
+:root{
+  --font-family-base:'TB Sans','TBSans','Inter','Segoe UI',system-ui,sans-serif;
+  --font-size-xs:11px; --font-size-sm:12px; --font-size-md:14px; --font-size-base:16px;
+  --font-size-lg:20px; --font-size-xl:24px;
+  --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-12:48px;
+  --radius-xs:2px; --radius-sm:4px; --radius-md:8px; --radius-lg:12px; --radius-full:999px;
+  --shadow-sm:0 1px 2px rgba(27,28,34,.08);
+  --shadow-md:0 4px 12px rgba(27,28,34,.12);
+  --shadow-lg:0 8px 24px rgba(27,28,34,.16);
+  --color-background:#F4F4F5; --color-baseline:#FFFFFF; --color-elevation:rgba(27,28,34,.06);
+  --color-primary:#0F1115; --color-secondary:#475061; --color-tertiary:#8A91A0; --color-on-accent:#FFFFFF;
+  --color-border:rgba(101,110,133,.2); --color-border-emphasis:rgba(101,110,133,.3);
+  --intent-accent-bg:#0097FD; --intent-accent-subtle-bg:rgba(0,151,253,.08); --intent-accent-text:#0097FD; --intent-accent-on:#FFFFFF;
+  --intent-info-bg:#0077CC; --intent-info-subtle-bg:rgba(0,119,204,.08); --intent-info-text:#0077CC;
+  --intent-danger-bg:#D93025; --intent-danger-subtle-bg:rgba(217,48,37,.08); --intent-danger-text:#C5221F; --intent-danger-on:#FFFFFF;
+  --intent-success-bg:#188038; --intent-success-subtle-bg:rgba(24,128,56,.08); --intent-success-text:#137333;
+  --intent-warning-bg:#E37400; --intent-warning-subtle-bg:rgba(227,116,0,.08); --intent-warning-text:#B06000;
+  --intent-inactive-bg:rgba(101,110,133,.12); --intent-inactive-text:#656E85;
+}
+body.dark-mode{
+  --color-background:#000000; --color-baseline:rgba(22,22,27,1); --color-elevation:rgba(255,255,255,.04);
+  --color-primary:#FFFFFF; --color-secondary:#C7CCD6; --color-tertiary:#8A91A0;
+  --color-border:rgba(168,176,199,.12); --color-border-emphasis:rgba(168,176,199,.2);
+  --intent-accent-bg:#4DB8FF; --intent-accent-subtle-bg:rgba(77,184,255,.1); --intent-accent-text:#4DB8FF;
+  --intent-info-bg:#3AA3FF; --intent-info-subtle-bg:rgba(58,163,255,.1); --intent-info-text:#3AA3FF;
+  --intent-danger-bg:#F0737B; --intent-danger-subtle-bg:rgba(240,115,123,.1); --intent-danger-text:#F0737B;
+  --intent-success-bg:#4ECBA8; --intent-success-subtle-bg:rgba(78,203,168,.1); --intent-success-text:#4ECBA8;
+  --intent-warning-bg:#E8A838; --intent-warning-subtle-bg:rgba(232,168,56,.1); --intent-warning-text:#E8A838;
+  --intent-inactive-bg:rgba(168,176,199,.12); --intent-inactive-text:#8A91A0;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-background);color:var(--color-primary);
+  font-family:var(--font-family-base);font-size:var(--font-size-md);line-height:1.5;letter-spacing:0}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,151,253,.15);border-radius:var(--radius-sm)}
+
+/* ---------- Navigation Bar ---------- */
+.uds-nav{min-height:72px;background:var(--color-baseline);border-bottom:1px solid var(--color-border);
+  display:flex;align-items:center;gap:var(--sp-6);padding:0 var(--sp-6);position:sticky;top:0;z-index:40}
+.uds-nav-logo{display:flex;align-items:center;gap:var(--sp-3);text-decoration:none;color:var(--color-primary);flex-shrink:0}
+.uds-nav-logo svg{width:34px;height:30px;fill:currentColor}
+.uds-nav-logo-name{font-size:var(--font-size-base);font-weight:var(--font-weight-semibold)}
+.uds-nav-menu{display:flex;align-items:center;gap:var(--sp-1);margin-left:var(--sp-4);flex:1;overflow-x:auto}
+.uds-nav-link{background:none;border:none;cursor:pointer;padding:var(--sp-3) var(--sp-4);border-radius:var(--radius-md);
+  color:var(--color-secondary);font-size:var(--font-size-md);font-weight:var(--font-weight-medium);white-space:nowrap}
+.uds-nav-link:hover{background:var(--color-elevation);color:var(--color-primary)}
+.uds-nav-link[aria-current="page"]{color:var(--intent-accent-text);background:var(--intent-accent-subtle-bg)}
+.uds-nav-right{display:flex;align-items:center;gap:var(--sp-3);margin-left:auto;flex-shrink:0}
+.uds-theme-btn{width:40px;height:40px;border-radius:var(--radius-full);border:1px solid var(--color-border);
+  background:var(--color-baseline);cursor:pointer;display:grid;place-items:center;font-size:16px}
+.uds-theme-btn:hover{background:var(--color-elevation)}
+.uds-user-info{display:flex;align-items:center;gap:var(--sp-3)}
+.uds-user-details{display:none}
+@media(min-width:1024px){.uds-user-details{display:block}}
+.uds-user-name{margin:0;font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold)}
+.uds-user-meta{margin:0;font-size:var(--font-size-xs);color:var(--color-secondary)}
+
+/* ---------- Avatar ---------- */
+.uds-avatar{border-radius:var(--radius-full);display:grid;place-items:center;font-weight:var(--font-weight-semibold);flex-shrink:0}
+.uds-avatar-md{width:40px;height:40px;font-size:var(--font-size-sm)}
+.uds-avatar-accent-solid{background:var(--intent-accent-bg);color:var(--intent-accent-on)}
+
+/* ---------- Layout ---------- */
+.uds-page{max-width:1600px;margin:0 auto;padding:var(--sp-6)}
+@media(max-width:639px){.uds-page{padding:var(--sp-4)}}
+
+/* ---------- Breadcrumbs ---------- */
+.uds-breadcrumb{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--font-size-sm);margin-bottom:var(--sp-3);flex-wrap:wrap}
+.uds-breadcrumb button{background:none;border:none;padding:0;cursor:pointer;color:var(--intent-accent-text);font-size:inherit}
+.uds-breadcrumb button:hover{text-decoration:underline}
+.uds-breadcrumb-sep{color:var(--color-tertiary)}
+.uds-breadcrumb-current{color:var(--color-secondary)}
+
+/* ---------- Page header ---------- */
+.uds-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);
+  flex-wrap:wrap;margin-bottom:var(--sp-5)}
+.uds-page-title{margin:0;font-size:var(--font-size-xl);font-weight:var(--font-weight-semibold)}
+.uds-page-meta{margin:var(--sp-1) 0 0;font-size:var(--font-size-sm);color:var(--color-secondary)}
+.uds-page-actions{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+
+/* ---------- Button ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);cursor:pointer;
+  border-radius:var(--radius-md);border:1px solid transparent;font-weight:var(--font-weight-medium);white-space:nowrap}
+.btn-sm{height:32px;padding:0 var(--sp-3);font-size:var(--font-size-sm)}
+.btn-md{height:40px;padding:0 var(--sp-4);font-size:var(--font-size-md)}
+.btn-primary{background:var(--intent-accent-bg);color:var(--intent-accent-on)}
+.btn-primary:hover{filter:brightness(.94)}
+.btn-secondary{background:var(--intent-accent-subtle-bg);color:var(--intent-accent-text)}
+.btn-secondary:hover{filter:brightness(.97)}
+.btn-outlined{background:var(--color-baseline);color:var(--intent-accent-text);border-color:var(--color-border-emphasis)}
+.btn-outlined:hover{background:var(--intent-accent-subtle-bg)}
+.btn-ghost{background:none;color:var(--intent-accent-text)}
+.btn-ghost:hover{background:var(--color-elevation)}
+.btn-danger-outlined{background:var(--color-baseline);color:var(--intent-danger-text);border-color:var(--intent-danger-bg)}
+.btn-danger-outlined:hover{background:var(--intent-danger-subtle-bg)}
+.btn:disabled{background:var(--intent-inactive-bg);color:var(--intent-inactive-text);border-color:transparent;cursor:not-allowed}
+.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Pill ---------- */
+.uds-pill{display:inline-flex;align-items:center;border-radius:var(--radius-full);
+  font-weight:var(--font-weight-medium);white-space:nowrap}
+.uds-pill-sm{height:20px;padding:0 var(--sp-2);font-size:var(--font-size-xs)}
+.uds-pill-md{height:24px;padding:0 var(--sp-3);font-size:var(--font-size-sm)}
+.uds-pill-accent{background:var(--intent-accent-subtle-bg);color:var(--intent-accent-text)}
+.uds-pill-info{background:var(--intent-info-subtle-bg);color:var(--intent-info-text)}
+.uds-pill-success{background:var(--intent-success-subtle-bg);color:var(--intent-success-text)}
+.uds-pill-warning{background:var(--intent-warning-subtle-bg);color:var(--intent-warning-text)}
+.uds-pill-danger{background:var(--intent-danger-subtle-bg);color:var(--intent-danger-text)}
+.uds-pill-inactive{background:var(--intent-inactive-bg);color:var(--intent-inactive-text)}
+
+/* ---------- Widget ---------- */
+.uds-widget{background:var(--color-baseline);border:1px solid var(--color-border);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.uds-widget-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--color-border);flex-wrap:wrap}
+.uds-widget-title{margin:0;font-size:var(--font-size-base);font-weight:var(--font-weight-semibold)}
+.uds-widget-body{padding:var(--sp-5)}
+
+/* ---------- Tabs (statusy) ---------- */
+.uds-tabs{display:flex;gap:var(--sp-2);overflow-x:auto;padding:var(--sp-3) var(--sp-5);
+  border-bottom:1px solid var(--color-border);background:var(--color-baseline)}
+.uds-tab{display:inline-flex;align-items:center;gap:var(--sp-2);white-space:nowrap;cursor:pointer;
+  background:none;border:1px solid var(--color-border);border-radius:var(--radius-full);
+  padding:var(--sp-2) var(--sp-3);font-size:var(--font-size-sm);color:var(--color-secondary)}
+.uds-tab:hover{background:var(--color-elevation)}
+.uds-tab[aria-selected="true"]{background:var(--intent-accent-bg);color:var(--intent-accent-on);border-color:var(--intent-accent-bg)}
+.uds-tab-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:var(--radius-full);background:var(--intent-inactive-bg);color:var(--intent-inactive-text);
+  font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold)}
+.uds-tab[aria-selected="true"] .uds-tab-count{background:rgba(255,255,255,.25);color:#fff}
+.uds-tab-count.has{background:var(--intent-warning-subtle-bg);color:var(--intent-warning-text)}
+
+/* ---------- Filtre ---------- */
+.uds-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--sp-3);
+  padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--color-border)}
+.uds-field{display:flex;flex-direction:column;gap:var(--sp-1)}
+.uds-label{font-size:var(--font-size-sm);color:var(--color-secondary);font-weight:var(--font-weight-medium)}
+.uds-input,.uds-select{height:40px;padding:0 var(--sp-3);border-radius:var(--radius-md);
+  border:1px solid var(--color-border-emphasis);background:var(--color-baseline);color:var(--color-primary);width:100%}
+.uds-input::placeholder{color:var(--color-tertiary)}
+.uds-input:focus-visible,.uds-select:focus-visible{border-color:var(--intent-accent-bg)}
+.uds-filter-actions{display:flex;align-items:flex-end;gap:var(--sp-2)}
+
+/* ---------- Table ---------- */
+.uds-table-scroll{overflow-x:auto}
+.uds-table{width:100%;border-collapse:collapse;font-size:var(--font-size-sm);min-width:1500px}
+.uds-table th{text-align:left;padding:var(--sp-3) var(--sp-4);color:var(--color-secondary);
+  font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);text-transform:uppercase;
+  white-space:nowrap;border-bottom:1px solid var(--color-border);background:var(--color-baseline);position:sticky;top:0;z-index:1}
+.uds-table td{padding:var(--sp-3) var(--sp-4);white-space:nowrap;vertical-align:middle}
+.uds-table tbody tr{cursor:pointer}
+.uds-table tbody tr:nth-child(odd){background:var(--color-background)}
+.uds-table tbody tr:hover{background:var(--intent-accent-subtle-bg)}
+.uds-table tbody tr.flag-multi{box-shadow:inset 3px 0 0 var(--intent-info-bg)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.txt-danger{color:var(--intent-danger-text);font-weight:var(--font-weight-semibold)}
+.txt-warning{color:var(--intent-warning-text);font-weight:var(--font-weight-semibold)}
+.txt-success{color:var(--intent-success-text);font-weight:var(--font-weight-semibold)}
+.txt-muted{color:var(--color-tertiary)}
+.cell-danger{background:var(--intent-danger-subtle-bg);border-radius:var(--radius-sm)}
+.truncate{max-width:220px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+
+/* ---------- Results meta + pagination ---------- */
+.uds-results-meta{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-5);font-size:var(--font-size-sm);color:var(--color-secondary);flex-wrap:wrap}
+.uds-pagination{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-5);border-top:1px solid var(--color-border);flex-wrap:wrap}
+.uds-pagination-right{display:flex;align-items:center;gap:var(--sp-1)}
+.uds-page-btn{width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid var(--color-border);
+  background:var(--color-baseline);cursor:pointer;color:var(--color-secondary)}
+.uds-page-btn:hover{background:var(--color-elevation)}
+.uds-page-num{display:grid;place-items:center;width:32px;height:32px;border-radius:var(--radius-sm);font-size:var(--font-size-sm)}
+.uds-page-num.active{background:var(--intent-accent-bg);color:var(--intent-accent-on);font-weight:var(--font-weight-semibold)}
+/* ---------- Alert ---------- */
+.uds-alert{display:flex;gap:var(--sp-3);align-items:flex-start;padding:var(--sp-4);
+  border-radius:var(--radius-md);font-size:var(--font-size-md);margin-bottom:var(--sp-4)}
+.uds-alert svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.uds-alert-info{background:var(--intent-info-subtle-bg);color:var(--intent-info-text)}
+.uds-alert-success{background:var(--intent-success-subtle-bg);color:var(--intent-success-text)}
+.uds-alert-warning{background:var(--intent-warning-subtle-bg);color:var(--intent-warning-text)}
+.uds-alert-danger{background:var(--intent-danger-subtle-bg);color:var(--intent-danger-text)}
+.uds-alert-title{font-weight:var(--font-weight-semibold);display:block;margin-bottom:2px}
+.uds-alert-actions{margin-left:auto;display:flex;gap:var(--sp-2);flex-shrink:0}
+
+/* ---------- Detail layout ---------- */
+.detail-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:var(--sp-5);align-items:start}
+@media(max-width:1023px){.detail-grid{grid-template-columns:1fr}}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.section-title{margin:0;font-size:var(--font-size-base);font-weight:var(--font-weight-semibold)}
+
+/* ---------- Kontroly ---------- */
+.check-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-3)}
+.check-item{display:flex;gap:var(--sp-3);align-items:flex-start}
+.check-icon{width:20px;height:20px;border-radius:var(--radius-full);display:grid;place-items:center;flex-shrink:0;margin-top:1px}
+.check-icon svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.check-ok{background:var(--intent-success-subtle-bg);color:var(--intent-success-text)}
+.check-warn{background:var(--intent-warning-subtle-bg);color:var(--intent-warning-text)}
+.check-stop{background:var(--intent-danger-subtle-bg);color:var(--intent-danger-text)}
+.check-name{font-weight:var(--font-weight-medium);font-size:var(--font-size-md)}
+.check-detail{font-size:var(--font-size-sm);color:var(--color-secondary)}
+.check-ods{font-size:var(--font-size-sm);color:var(--intent-accent-text);margin-top:2px}
+
+/* ---------- História ---------- */
+.hist-item{padding:var(--sp-3);border-radius:var(--radius-md);background:var(--color-background);margin-bottom:var(--sp-2)}
+.hist-field{font-weight:var(--font-weight-medium);font-size:var(--font-size-sm)}
+.hist-vals{font-size:var(--font-size-sm);margin-top:2px}
+.hist-old{color:var(--color-tertiary);text-decoration:line-through}
+.hist-new{color:var(--intent-accent-text);font-weight:var(--font-weight-medium)}
+.hist-meta{font-size:var(--font-size-xs);color:var(--color-secondary);margin-top:4px}
+
+/* ---------- Polia detailu ---------- */
+.fields-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--sp-4) var(--sp-5)}
+.field-ro{display:flex;flex-direction:column;gap:2px;padding-bottom:var(--sp-2);border-bottom:1px solid var(--color-border)}
+.field-ro-label{font-size:var(--font-size-sm);color:var(--color-secondary)}
+.field-ro-value{font-size:var(--font-size-md);font-weight:var(--font-weight-medium)}
+.field-ed{display:flex;flex-direction:column;gap:var(--sp-1)}
+.field-ed .uds-label{display:flex;align-items:center;gap:var(--sp-2)}
+.field-ed .uds-input,.field-ed .uds-select{border-color:var(--intent-accent-bg);background:var(--intent-accent-subtle-bg)}
+.field-ed .uds-input:disabled,.field-ed .uds-select:disabled{border-color:var(--color-border);background:var(--color-background);color:var(--color-tertiary)}
+.field-ed textarea.uds-input{height:auto;min-height:76px;padding:var(--sp-3);resize:vertical;line-height:1.45}
+.field-err .uds-input{border-color:var(--intent-danger-bg);background:var(--intent-danger-subtle-bg)}
+.helper{font-size:var(--font-size-xs);color:var(--color-secondary)}
+.helper-err{font-size:var(--font-size-xs);color:var(--intent-danger-text);font-weight:var(--font-weight-medium)}
+.status-label{font-size:var(--font-size-xs);color:var(--intent-accent-text);font-weight:var(--font-weight-medium)}
+
+/* ---------- Bankové spojenie ---------- */
+.bank-box{border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--sp-4);background:var(--color-background)}
+.bank-box.flag-multi{border-color:var(--intent-info-bg);background:var(--intent-info-subtle-bg)}
+.bank-note{margin-top:var(--sp-3);padding:var(--sp-3);border-radius:var(--radius-sm);background:var(--color-baseline);
+  font-size:var(--font-size-sm);color:var(--color-secondary)}
+
+/* ---------- XML tabuľka ---------- */
+.xml-table{width:100%;border-collapse:collapse;font-size:var(--font-size-sm)}
+.xml-table td{padding:var(--sp-2) var(--sp-3);vertical-align:top}
+.xml-table tr:nth-child(odd){background:var(--color-background)}
+.xml-key{color:var(--color-secondary);white-space:nowrap;width:1%;font-family:ui-monospace,Consolas,monospace;font-size:var(--font-size-xs)}
+
+/* ---------- Obraz faktúry (drawer) ---------- */
+.drawer{position:fixed;inset:0 0 0 auto;width:min(560px,100%);background:var(--color-baseline);
+  border-left:1px solid var(--color-border);box-shadow:var(--shadow-lg);z-index:50;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .2s ease}
+.drawer.open{transform:translateX(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--color-border)}
+.drawer-body{flex:1;overflow:auto;padding:var(--sp-5);background:var(--color-background)}
+.paper{background:#fff;color:#0F1115;border-radius:var(--radius-sm);box-shadow:var(--shadow-md);padding:var(--sp-6)}
+body.dark-mode .paper{background:#f7f7f8}
+.paper-head{display:flex;justify-content:space-between;gap:var(--sp-4);border-bottom:2px solid #0F1115;padding-bottom:var(--sp-3)}
+.paper-title{font-size:var(--font-size-lg);font-weight:var(--font-weight-bold);margin:0}
+.paper-sub{font-size:var(--font-size-xs);text-transform:uppercase;letter-spacing:.08em;color:#475061}
+.paper-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-top:var(--sp-4);font-size:var(--font-size-sm)}
+.paper-table{width:100%;border-collapse:collapse;margin-top:var(--sp-4);font-size:var(--font-size-sm)}
+.paper-table th{text-align:left;border-bottom:1px solid #0F1115;padding:var(--sp-2) 0;font-size:var(--font-size-xs);text-transform:uppercase}
+.paper-table td{padding:var(--sp-2) 0;border-bottom:1px solid rgba(0,0,0,.1)}
+.paper-total{display:flex;justify-content:space-between;align-items:flex-end;margin-top:var(--sp-4)}
+.hl{background:#FFE68A;border-radius:2px;padding:0 2px}
+.drawer-hint{font-size:var(--font-size-xs);color:var(--color-secondary);text-align:center;margin-top:var(--sp-3)}
+
+/* ---------- Modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(15,17,21,.45);z-index:60;display:grid;place-items:center;padding:var(--sp-4)}
+.modal{background:var(--color-baseline);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);
+  width:min(520px,100%);overflow:hidden}
+.modal-header{padding:var(--sp-5);border-bottom:1px solid var(--color-border)}
+.modal-title{margin:0;font-size:var(--font-size-lg);font-weight:var(--font-weight-semibold)}
+.modal-body{padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-3)}
+.modal-footer{padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--color-border);
+  display:flex;justify-content:flex-end;gap:var(--sp-2)}
+
+/* ---------- Toast ---------- */
+.toast-wrap{position:fixed;left:50%;bottom:var(--sp-6);transform:translateX(-50%);z-index:70;
+  display:flex;flex-direction:column;gap:var(--sp-2);width:min(560px,calc(100% - 32px))}
+.toast{background:var(--color-primary);color:var(--color-baseline);padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--radius-md);box-shadow:var(--shadow-lg);font-size:var(--font-size-sm)}
+body.dark-mode .toast{background:#2A2B31;color:#fff}
+
+/* ---------- Empty state ---------- */
+.empty{display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);padding:var(--sp-12) var(--sp-5);text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:var(--radius-full);background:var(--intent-accent-subtle-bg);
+  color:var(--intent-accent-text);display:grid;place-items:center}
+.empty-icon svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.empty h3{margin:0;font-size:var(--font-size-base);font-weight:var(--font-weight-semibold)}
+.empty p{margin:0;color:var(--color-secondary);max-width:46ch;font-size:var(--font-size-md)}
+
+/* ---------- Actions bar ---------- */
+.actions-bar{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center;
+  padding:var(--sp-4) var(--sp-5);background:var(--color-baseline);border:1px solid var(--color-border);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);margin-top:var(--sp-5)}
+.legend{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);padding:var(--sp-3) var(--sp-5);
+  font-size:var(--font-size-xs);color:var(--color-secondary);border-bottom:1px solid var(--color-border)}
+.legend b{font-weight:var(--font-weight-semibold);text-transform:uppercase;letter-spacing:.06em}
+.dot{display:inline-block;width:8px;height:8px;border-radius:var(--radius-full);margin-right:6px;vertical-align:middle}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<header class="uds-nav">
+  <a class="uds-nav-logo" href="#" onclick="return false">
+    <svg viewBox="0 0 47 41" aria-hidden="true"><path d="M4 41 23.5 0 43 41h-9.5L23.5 19.5 13.5 41z"/></svg>
+    <span class="uds-nav-logo-name">eInvoice</span>
+  </a>
+  <nav class="uds-nav-menu" aria-label="Hlavná navigácia">
+    <button class="uds-nav-link" data-nav="admin">Administratíva</button>
+    <button class="uds-nav-link" data-nav="odberatelske">Odberateľské faktúry</button>
+    <button class="uds-nav-link" data-nav="dodavatelske" aria-current="page">Dodávateľské faktúry</button>
+  </nav>
+  <div class="uds-nav-right">
+    <button class="uds-theme-btn" id="themeToggle" aria-label="Prepnúť tmavý režim">🌙</button>
+    <div class="uds-user-info">
+      <div class="uds-avatar uds-avatar-md uds-avatar-accent-solid" aria-hidden="true">T</div>
+      <div class="uds-user-details">
+        <p class="uds-user-name">Tester</p>
+        <p class="uds-user-meta">TB 123456 · Prevádzková účtáreň</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="uds-page" id="app"></main>
+<div class="toast-wrap" id="toasts"></div>
+<div id="drawerHost"></div>
+<div id="modalHost"></div>
+<script>
+/* ============ číselníky ============ */
+const STAV = {
+  1:{n:'Na spracovanie',p:'uds-pill-info'},
+  2:{n:'Dodávateľ nezaevidovaný',p:'uds-pill-warning'},
+  3:{n:'BU neexistuje',p:'uds-pill-warning'},
+  4:{n:'Duplicita',p:'uds-pill-danger'},
+  5:{n:'Odložené',p:'uds-pill-inactive'},
+  6:{n:'Na odoslanie',p:'uds-pill-accent'},
+  7:{n:'Stornované',p:'uds-pill-danger'},
+  8:{n:'Odoslané do iProc',p:'uds-pill-info'},
+  9:{n:'Vrátené z iProc',p:'uds-pill-danger'},
+  10:{n:'Zaevidované v iProc',p:'uds-pill-success'},
+  11:{n:'Reexport faktúry',p:'uds-pill-warning'}
+};
+const TYP = {380:'380 Faktúra',381:'381 Dobropis',383:'383 Ťarchopis',384:'384 Opravná faktúra',386:'386 Zálohová faktúra'};
+const UHRADA = {1:'1. No item selected',2:'2. Platené v hotovosti',3:'3. Služobná KK',4:'4. Vyúčtovacia faktúra',5:'5. Zaplatené zálohou'};
+const VSEOB_UCET = 'SK11 1100 0000 0020 0100 3800';
+const TB_ICDPH = 'SK7020000944';
+const TB = '123456';
+/* povolené manuálne prechody */
+const PRECHODY = {1:[5,6,7],2:[7],3:[],4:[5,6,7],5:[1,6,7],6:[],7:[11],8:[],9:[5,6,7],10:[11],11:[6]};
+
+/* ============ dáta ============ */
+const ucet = (iban,vFa,vOds,tb)=>({iban,vFa,vOds,tb});
+let ID = 0;
+function fa(o){ return Object.assign({
+  id:'FA'+(++ID), oznacenie:'Dodávateľská faktúra', poznamka:'', vsAuto:false, cPovodnej:'',
+  cisloNO:'', cisloZmluvy:'', verifiedBy:'', chybaIproc:'', interneCislo:'', sposobUhrady:1,
+  mena:'EUR', remittance:'', historia:[], icdphOdb:TB_ICDPH
+}, o); }
+
+let FAKTURY = [
+ fa({stav:1,typ:380,datumPrijatia:'14.08.2026 08:14',partner:'Alfa Facility s.r.o.',ico:'12345671',icdph:'SK2020123456',
+   oracleId:'9972501',sapId:'0001234501',ucet:'SK31 1100 0000 0026 1800 4512',
+   ucty:[ucet('SK31 1100 0000 0026 1800 4512',true,true,true)],
+   cisloFaktury:'FA2026/0341',vs:'20260341',datumFaktury:'12.08.2026',datumDanDokl:'12.08.2026',splatnost:'28.08.2026',
+   sumaNaUhradu:'1 248,00',ciastka:'1 248,00',zakladDane:'1 040,00',vyskaDane:'208,00',cisloNO:'86123401',
+   popis:'Nájom nebytových priestorov a energie 07/2026',
+   remittance:'Fakturujeme nájom a služby podľa zmluvy č. 123456 za obdobie 07/2026.',
+   polozky:[{p:'Nájomné 07/2026',c:'980,00'},{p:'Energie a služby 07/2026',c:'60,00'}]}),
+
+ fa({stav:1,typ:380,datumPrijatia:'14.08.2026 09:02',partner:'Delta Energie a.s.',ico:'12345672',icdph:'SK2020123457',
+   oracleId:'9972502',sapId:'0001234502',ucet:'SK75 1100 0000 0029 4477 1122',vsAuto:true,
+   ucty:[ucet('SK75 1100 0000 0029 4477 1122',true,true,true),ucet('SK89 0200 0000 0031 4455 6677',true,true,false),
+         ucet('SK12 0900 0000 0051 9988 7766',true,false,false)],
+   cisloFaktury:'1234567890/2026',vs:'1234567890',datumFaktury:'13.08.2026',datumDanDokl:'31.07.2026',splatnost:'30.08.2026',
+   sumaNaUhradu:'12 480,00',ciastka:'12 480,00',zakladDane:'10 400,00',vyskaDane:'2 080,00',cisloZmluvy:'86123402',
+   popis:'123456 Dodávka elektrickej energie 07/2026, odberné miesto 123456',
+   remittance:'Číslo zákazníka 123456. Platbu uhraďte na účet SK75 1100 0000 0029 4477 1122.',
+   warnIcdph:true, warnNazov:'Delta Energie, a. s.',
+   polozky:[{p:'Elektrická energia 07/2026',c:'10 400,00'}]}),
+
+ fa({stav:2,typ:380,datumPrijatia:'14.08.2026 07:48',partner:'Sigma Údržba s.r.o.',ico:'12345678',icdph:'SK2020123463',
+   oracleId:'',sapId:'',ucet:'SK77 0900 0000 0011 2233 4400',
+   ucty:[ucet('SK77 0900 0000 0011 2233 4400',true,false,false)],
+   cisloFaktury:'FA-415/2026',vs:'20260415',datumFaktury:'11.08.2026',datumDanDokl:'11.08.2026',splatnost:'25.08.2026',
+   sumaNaUhradu:'612,00',ciastka:'612,00',zakladDane:'510,00',vyskaDane:'102,00',
+   popis:'Servis klimatizácie - pobočka 123456',poznamka:'Zadaný request do iProc na založenie dodávateľa.',
+   polozky:[{p:'Servis klimatizácie',c:'510,00'}]}),
+
+ fa({stav:3,typ:380,datumPrijatia:'13.08.2026 10:41',partner:'Nova Print s.r.o.',ico:'12345673',icdph:'SK2020123458',
+   oracleId:'9972503',sapId:'0001234503',ucet:'SK55 8330 0000 0029 9911 0044',
+   ucty:[ucet('SK55 8330 0000 0029 9911 0044',true,false,false),ucet('SK21 1100 0000 0077 6655 4433',false,true,true)],
+   cisloFaktury:'2026-0107',vs:'20260107',datumFaktury:'11.08.2026',datumDanDokl:'11.08.2026',splatnost:'25.08.2026',
+   sumaNaUhradu:'356,40',ciastka:'356,40',zakladDane:'297,00',vyskaDane:'59,40',cisloNO:'86123403',
+   popis:'Tlač marketingových materiálov podľa objednávky',
+   poznamka:'Zadaný request do iProc na založenie bankového spojenia.',
+   polozky:[{p:'Tlač letákov A5',c:'297,00'}]}),
+
+ fa({stav:4,typ:384,datumPrijatia:'13.08.2026 11:20',partner:'Omega Poisťovňa a.s.',ico:'12345674',icdph:'SK2020123459',
+   oracleId:'9972504',sapId:'0001234504',ucet:'SK12 0900 0000 0051 2233 4455',
+   ucty:[ucet('SK12 0900 0000 0051 2233 4455',true,true,false)],
+   cisloFaktury:'12345674',vs:'12345674',datumFaktury:'10.08.2026',datumDanDokl:'10.08.2026',splatnost:'27.08.2026',
+   sumaNaUhradu:'820,00',ciastka:'820,00',zakladDane:'820,00',vyskaDane:'0,00',
+   popis:'Oprava fakturácie - poistná udalosť č. 123456',
+   remittance:'Poistné plnenie k poistnej zmluve č. 123456.',
+   polozky:[{p:'Oprava fakturácie',c:'820,00'}]}),
+
+ fa({stav:1,typ:383,datumPrijatia:'14.08.2026 09:12',partner:'Delta Energie a.s.',ico:'12345672',icdph:'SK2020123457',
+   oracleId:'9972502',sapId:'0001234502',ucet:'SK89 0200 0000 0031 4455 6677',
+   ucty:[ucet('SK89 0200 0000 0031 4455 6677',true,true,false)],
+   cisloFaktury:'TA2026/0012',vs:'20260501',datumFaktury:'13.08.2026',datumDanDokl:'14.08.2026',splatnost:'28.08.2026',
+   sumaNaUhradu:'96,00',ciastka:'96,00',zakladDane:'80,00',vyskaDane:'16,00',cisloZmluvy:'86123402',
+   popis:'Ťarchopis - doúčtovanie spotreby 06/2026',
+   remittance:'Doúčtovanie spotreby k pôvodnej faktúre.',
+   polozky:[{p:'Doúčtovanie spotreby',c:'80,00'}]}),
+
+ fa({stav:1,typ:386,datumPrijatia:'13.08.2026 13:30',partner:'Epsilon Konferencie s.r.o.',ico:'12345679',icdph:'SK2020123464',
+   oracleId:'9972507',sapId:'0001234507',ucet:'SK21 1100 0000 0099 8877 6655',
+   ucty:[ucet('SK21 1100 0000 0099 8877 6655',false,true,true),ucet('SK98 3100 0000 0044 5566 7788',true,false,false)],
+   cisloFaktury:'ZF2026/0520',vs:'20260520',datumFaktury:'12.08.2026',datumDanDokl:'12.08.2026',splatnost:'27.08.2026',
+   sumaNaUhradu:'1 000,00',ciastka:'1 200,00',zakladDane:'1 000,00',vyskaDane:'200,00',
+   popis:'Zálohová faktúra - prenájom priestorov na podujatie 09/2026',
+   remittance:'Záloha podľa objednávky č. 123456. Platbu na účet vedený v Tatra banke.',
+   polozky:[{p:'Záloha - prenájom priestorov',c:'1 000,00'}]}),
+
+ fa({stav:9,typ:380,datumPrijatia:'12.08.2026 14:05',partner:'Beta Catering s.r.o.',ico:'12345675',icdph:'SK2020123460',
+   oracleId:'9972505',sapId:'0001234505',ucet:'SK44 7500 0000 0040 5566 7788',
+   ucty:[ucet('SK44 7500 0000 0040 5566 7788',true,true,false)],
+   cisloFaktury:'FA2026/2201',vs:'22012026',datumFaktury:'10.08.2026',datumDanDokl:'09.08.2026',splatnost:'24.08.2026',
+   sumaNaUhradu:'540,00',ciastka:'540,00',zakladDane:'450,00',vyskaDane:'90,00',cisloNO:'86123405',
+   popis:'Catering - firemné podujatie',verifiedBy:TB,
+   chybaIproc:'Chýba účtovné priradenie pre nákladové stredisko.',
+   polozky:[{p:'Catering podľa ponuky',c:'450,00'}]}),
+
+ fa({stav:10,typ:381,datumPrijatia:'08.08.2026 09:31',partner:'Gama IT Services s.r.o.',ico:'12345676',icdph:'SK2020123461',
+   oracleId:'9972506',sapId:'0001234506',ucet:VSEOB_UCET,
+   ucty:[ucet('SK66 1111 0000 0012 3400 9876',true,true,true)],
+   cisloFaktury:'FA2026/0298',vs:'20260298',datumFaktury:'07.08.2026',datumDanDokl:'08.08.2026',splatnost:'22.08.2026',
+   sumaNaUhradu:'-180,00',ciastka:'-180,00',zakladDane:'-150,00',vyskaDane:'-30,00',cPovodnej:'FA2026/0255',
+   popis:'Dobropis k faktúre FA2026/0255 - reklamácia služby',interneCislo:'602608123',verifiedBy:TB,
+   remittance:'Dobropisujeme reklamovanú službu k faktúre FA2026/0255.',
+   polozky:[{p:'Dobropis - reklamácia',c:'-150,00'}]}),
+
+ fa({stav:5,typ:380,datumPrijatia:'11.08.2026 15:22',partner:'Kappa Security s.r.o.',ico:'12345677',icdph:'SK2020123462',
+   oracleId:'9972509',sapId:'0001234509',ucet:'SK38 0200 0000 0018 7766 5544',
+   ucty:[ucet('SK38 0200 0000 0018 7766 5544',true,true,false)],
+   cisloFaktury:'2026/00871',vs:'202600871',datumFaktury:'08.08.2026',datumDanDokl:'08.08.2026',splatnost:'22.08.2026',
+   sumaNaUhradu:'2 340,00',ciastka:'2 340,00',zakladDane:'1 950,00',vyskaDane:'390,00',
+   popis:'Strážna služba 07/2026',poznamka:'Čaká na doplnenie čísla objednávky od útvaru.',
+   polozky:[{p:'Strážna služba 07/2026',c:'1 950,00'}]}),
+
+ fa({stav:7,typ:380,datumPrijatia:'07.08.2026 08:55',partner:'Alfa Facility s.r.o.',ico:'12345671',icdph:'SK2020123456',
+   oracleId:'9972501',sapId:'0001234501',ucet:'SK31 1100 0000 0026 1800 4512',
+   ucty:[ucet('SK31 1100 0000 0026 1800 4512',true,true,true)],
+   cisloFaktury:'FA2026/0311',vs:'20260311',datumFaktury:'05.08.2026',datumDanDokl:'05.08.2026',splatnost:'19.08.2026',
+   sumaNaUhradu:'1 248,00',ciastka:'1 248,00',zakladDane:'1 040,00',vyskaDane:'208,00',
+   popis:'Nájom 07/2026 - duplicitne prijatá faktúra',
+   poznamka:'Stornované - faktúra už bola spracovaná cez ABBYY.',
+   polozky:[{p:'Nájomné 07/2026',c:'1 040,00'}]}),
+
+ fa({stav:11,typ:380,datumPrijatia:'06.08.2026 11:12',partner:'Theta Logistics s.r.o.',ico:'12345680',icdph:'SK2020123467',
+   oracleId:'9972510',sapId:'0001234510',ucet:'SK63 1100 0000 0026 5544 3322',
+   ucty:[ucet('SK63 1100 0000 0026 5544 3322',true,true,true)],
+   cisloFaktury:'LG-2026-0455',vs:'20260455',datumFaktury:'04.08.2026',datumDanDokl:'04.08.2026',splatnost:'18.08.2026',
+   sumaNaUhradu:'4 512,00',ciastka:'4 512,00',zakladDane:'3 760,00',vyskaDane:'752,00',cisloNO:'86123410',
+   popis:'Prepravné služby 07/2026',interneCislo:'602608377',verifiedBy:TB,
+   poznamka:'Reexport - nesprávne číslo objednávky, opravené na 86123410.',
+   polozky:[{p:'Prepravné služby 07/2026',c:'3 760,00'}]})
+];
+
+/* doplnenie XML sekcie a histórie */
+FAKTURY.forEach(f=>{
+  f.ostatneXml = [
+    ['cbc:CustomizationID','urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0'],
+    ['cbc:ProfileID','urn:fdc:peppol.eu:2017:poacc:billing:01:1.0'],
+    ['cbc:InvoiceTypeCode',String(f.typ)],
+    ['cac:AccountingSupplierParty/PostalAddress','Vzorová 12, 811 01 Bratislava, SK'],
+    ['cac:AccountingCustomerParty/PartyName','Tatra banka, a.s.'],
+    ['cac:AccountingCustomerParty/CompanyID',f.icdphOdb],
+    ['cac:PaymentTerms/Note','Splatnosť '+f.splatnost],
+    ['cac:TaxTotal/TaxAmount',f.vyskaDane+' '+f.mena],
+    ['cac:LegalMonetaryTotal/PayableAmount',f.sumaNaUhradu+' '+f.mena]
+  ];
+  if(f.vsAuto) f.historia.push({pole:'Variabilný symbol',stare:'(prázdne na faktúre)',nove:f.vs,kto:'Systém',kedy:f.datumPrijatia});
+  if(f.typ===381) f.historia.push({pole:'Čiastky faktúry',stare:'kladné hodnoty',nove:'záporné hodnoty',kto:'Systém',kedy:f.datumPrijatia});
+  if(f.ucet===VSEOB_UCET && f.ucty.length) f.historia.push({pole:'Číslo bankového účtu',stare:f.ucty[0].iban,nove:VSEOB_UCET,kto:'Systém',kedy:f.datumPrijatia});
+  if(f.stav===11) f.historia.push({pole:'Číslo NO',stare:'86123399',nove:'86123410',kto:'TB '+TB,kedy:'14.08.2026 10:05'});
+});
+
+/* odberateľské faktúry */
+const ODBERATELSKE = [
+ {id:'OF1',datum:'14.08.2026 06:15',zdroj:'FEEBEE',peppol:'Áno',odoslane:'14.08.2026',odpoved:'14.08.2026',status:'Doručená',pozn:''},
+ {id:'OF2',datum:'14.08.2026 06:15',zdroj:'SAP FI',peppol:'Áno',odoslane:'14.08.2026',odpoved:'—',status:'U poštára',pozn:''},
+ {id:'OF3',datum:'13.08.2026 18:40',zdroj:'OFA',peppol:'Nie',odoslane:'n/a',odpoved:'n/a',status:'Mimo Peppol',pozn:'Odoslané e-mailom 13.08.2026'},
+ {id:'OF4',datum:'13.08.2026 12:03',zdroj:'FIS',peppol:'Áno',odoslane:'13.08.2026',odpoved:'13.08.2026',status:'Doručená',pozn:''},
+ {id:'OF5',datum:'12.08.2026 09:27',zdroj:'LEASIT',peppol:'Áno',odoslane:'12.08.2026',odpoved:'12.08.2026',status:'Zamietnutá poštárom',pozn:'Nesúlad zaokrúhlenia DPH'},
+ {id:'OF6',datum:'12.08.2026 08:10',zdroj:'Manuálne zadanie · TB 123456',peppol:'Nie',odoslane:'n/a',odpoved:'n/a',status:'Mimo Peppol',pozn:'Zelená pošta 12.08.2026'}
+];
+</script>
+<script>
+/* ============ stav aplikácie ============ */
+let S = { nav:'dodavatelske', tab:'all', detailId:null, drawer:false, focusField:null,
+          filter:{q:'',stav:'',typ:'',partner:''} };
+
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+const esc = (s)=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const F = (id)=>FAKTURY.find(f=>f.id===id);
+
+function toast(msg){
+  const t = el(`<div class="toast" role="status">${esc(msg)}</div>`);
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},4200);
+}
+
+/* ============ odvodené pravidlá ============ */
+const viacUctov = f => (f.ucty||[]).filter(u=>u.vFa).length>1;
+const sumaOdlisna = f => f.sumaNaUhradu !== f.ciastka;
+const jeTarchopis = f => f.typ===383 || (f.typ!==381 && f.typ!==383 && !!f.cPovodnej);
+const cpfChyba = f => (f.typ===381||f.typ===383) && !f.cPovodnej;
+
+function farbaUctu(f){
+  if(f.ucet===VSEOB_UCET) return {cls:'txt-success',txt:'Všeobecný účet - kontrola bankového spojenia sa nevykonáva'};
+  const u=(f.ucty||[]).find(x=>x.iban===f.ucet);
+  if(!u) return {cls:'',txt:''};
+  if(u.vOds&&u.vFa) return {cls:'txt-success',txt:'Účet je na faktúre aj v kmeňových dátach'};
+  if(u.vOds&&!u.vFa) return {cls:'txt-warning',txt:'Účet je evidovaný iba v kmeňových dátach'};
+  return {cls:'txt-danger',txt:'Účet nie je evidovaný v kmeňových dátach - odoslanie do iProc nie je možné'};
+}
+function editovatelne(f,pole){
+  if(f.stav===8) return false;
+  if(f.stav===10) return false;
+  if(f.stav===2||f.stav===3) return ['poznamka','ucet','sposobUhrady'].includes(pole);
+  switch(pole){
+    case 'cisloFaktury': return [4,9,11].includes(f.stav);
+    case 'vs': return !!f.vsAuto;
+    case 'cPovodnej': return f.typ===381||f.typ===383;
+    case 'datumDanDokl': return f.typ===381||f.typ===383||jeTarchopis(f);
+    case 'zakladDane': case 'vyskaDane': return f.typ===386;
+    default: return true;
+  }
+}
+function kontroly(f){
+  const k=[];
+  k.push({id:'A1',n:'IČ DPH odberateľa',res:f.icdphOdb===TB_ICDPH?'ok':'warn',
+    d:f.icdphOdb===TB_ICDPH?'Zhoda s IČ DPH Tatra banky':'Nezhoda - faktúra pokračuje v procese',
+    ods:f.icdphOdb===TB_ICDPH?null:TB_ICDPH});
+  k.push({id:'A',n:'Existencia dodávateľa',res:f.oracleId?'ok':'stop',
+    d:f.oracleId?('Nájdený v kmeňových dátach · Oracle vendor ID '+f.oracleId):'Dodávateľ nie je zaevidovaný v kmeňových dátach'});
+  const fu=farbaUctu(f);
+  k.push({id:'B',n:'Bankové spojenie',res:fu.cls==='txt-danger'?'stop':(fu.cls==='txt-warning'?'warn':'ok'),d:fu.txt||'Účet je evidovaný'});
+  k.push({id:'C',n:'Duplicita faktúry',res:f.stav===4?'stop':'ok',
+    d:f.stav===4?(f.typ===384?'Opravná faktúra je vždy vyhodnotená ako duplicita':'Nájdená zhoda podľa DIČ, čísla faktúry a dátumu vystavenia'):'Bez nálezu'});
+  if(f.warnIcdph) k.push({id:'W1',n:'IČ DPH dodávateľa',res:'warn',d:'Nesúlad s kmeňovými dátami',ods:'SK2020123999'});
+  if(f.warnNazov) k.push({id:'W2',n:'Meno / názov dodávateľa',res:'warn',d:'Čiastočná nezhoda názvu',ods:f.warnNazov});
+  return k;
+}
+function log(f,pole,stare,nove,kto){
+  f.historia.unshift({pole,stare:stare===''?'(prázdne)':stare,nove:nove===''?'(prázdne)':nove,
+    kto:kto||('TB '+TB),kedy:new Date().toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})});
+}
+
+/* ============ ikony ============ */
+const IC = {
+  ok:'<svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg>',
+  warn:'<svg viewBox="0 0 24 24"><line x1="12" y1="6" x2="12" y2="14"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+  stop:'<svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>',
+  info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.5" x2="12.01" y2="7.5"/></svg>',
+  send:'<svg viewBox="0 0 24 24"><line x1="21" y1="3" x2="10" y2="14"/><polygon points="21 3 14.5 21 10 14 3 9.5 21 3"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>',
+  ban:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/></svg>',
+  redo:'<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>',
+  doc:'<svg viewBox="0 0 24 24"><path d="M6 2.5h8l4 4V21a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><polyline points="14 2.5 14 7 18.5 7"/></svg>',
+  search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  box:'<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><line x1="12" y1="13" x2="12" y2="21"/></svg>'
+};
+function pill(stav,size='md'){const s=STAV[stav];return `<span class="uds-pill uds-pill-${size} ${s.p}">${s.n}</span>`;}
+
+/* ============ router ============ */
+function render(){
+  document.querySelectorAll('.uds-nav-link').forEach(b=>{
+    if(b.dataset.nav===S.nav) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  const app=$('#app'); app.innerHTML='';
+  if(S.nav==='dodavatelske') app.appendChild(S.detailId?viewDetail():viewZoznam());
+  else if(S.nav==='odberatelske') app.appendChild(viewOdberatelske());
+  else app.appendChild(viewAdmin());
+  renderDrawer();
+  window.scrollTo({top:0});
+}
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-nav]');
+  if(nav){ S.nav=nav.dataset.nav; S.detailId=null; S.drawer=false; render(); }
+});
+$('#themeToggle').addEventListener('click',()=>{
+  document.body.classList.toggle('dark-mode');
+  $('#themeToggle').textContent=document.body.classList.contains('dark-mode')?'☀️':'🌙';
+});
+</script>
+<script>
+/* ============ OBRAZOVKA: zoznam dodávateľských faktúr (UC-06) ============ */
+function filtrovane(){
+  return FAKTURY.filter(f=>{
+    if(S.tab!=='all' && f.stav!==Number(S.tab)) return false;
+    const q=S.filter.q.toLowerCase();
+    if(q){
+      const hay=[f.partner,f.cisloFaktury,f.popis,f.vs,f.ico,f.icdph,f.cisloNO,f.cisloZmluvy,f.interneCislo,f.poznamka].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    if(S.filter.typ && String(f.typ)!==S.filter.typ) return false;
+    if(S.filter.partner){
+      if(!f.partner.toLowerCase().includes(S.filter.partner.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
+function viewZoznam(){
+  const pocty={}; FAKTURY.forEach(f=>pocty[f.stav]=(pocty[f.stav]||0)+1);
+  const tabs=[1,2,3,4,5,6,7,8,9,10,11].map(s=>{
+    const sel=S.tab===String(s);
+    const c=pocty[s]||0;
+    return `<button class="uds-tab" role="tab" aria-selected="${sel}" data-tab="${s}">
+      <span>${s}. ${STAV[s].n}</span><span class="uds-tab-count ${c>0&&!sel?'has':''}">${c}</span></button>`;
+  }).join('');
+  const allSel=S.tab==='all';
+  const tabAll=`<button class="uds-tab" role="tab" aria-selected="${allSel}" data-tab="all">
+      <span>Všetko</span><span class="uds-tab-count ${!allSel?'has':''}">${FAKTURY.length}</span></button>`;
+
+  const data=filtrovane();
+  const riadky = data.map(f=>{
+    const fu=farbaUctu(f);
+    return `<tr data-open="${f.id}" class="${viacUctov(f)?'flag-multi':''}">
+      <td>${pill(f.stav,'sm')}</td>
+      <td>${esc(f.datumPrijatia)}</td>
+      <td>${esc(TYP[f.typ])}</td>
+      <td><strong>${esc(f.partner)}</strong></td>
+      <td>${esc(f.ico)}</td>
+      <td>${esc(f.oracleId)||'<span class="txt-muted">—</span>'}</td>
+      <td class="${fu.cls}" title="${esc(fu.txt)}">${esc(f.ucet)}${viacUctov(f)?' <span class="uds-pill uds-pill-sm uds-pill-info">viac účtov</span>':''}</td>
+      <td>${esc(f.cisloFaktury)}</td>
+      <td>${esc(f.vs)}</td>
+      <td class="${cpfChyba(f)?'cell-danger txt-danger':''}">${esc(f.cPovodnej)|| (cpfChyba(f)?'Doplňte':'<span class="txt-muted">—</span>')}</td>
+      <td>${esc(f.datumFaktury)}</td>
+      <td>${esc(f.datumDanDokl)}</td>
+      <td>${esc(f.splatnost)}</td>
+      <td>${f.sposobUhrady>1?esc(UHRADA[f.sposobUhrady]):'<span class="txt-muted">'+esc(UHRADA[1])+'</span>'}</td>
+      <td class="num ${sumaOdlisna(f)?'txt-warning':''}" title="${sumaOdlisna(f)?'Suma na úhradu je odlišná od čiastky faktúry':''}">${esc(f.sumaNaUhradu)}</td>
+      <td class="num">${esc(f.ciastka)}</td>
+      <td>${esc(f.mena)}</td>
+      <td><span class="truncate">${esc(f.popis)}</span></td>
+      <td>${esc(f.cisloNO)||'<span class="txt-muted">—</span>'}</td>
+      <td>${esc(f.verifiedBy)||'<span class="txt-muted">—</span>'}</td>
+      <td>${f.chybaIproc?'<span class="truncate txt-danger">'+esc(f.chybaIproc)+'</span>':'<span class="txt-muted">—</span>'}</td>
+      <td>${esc(f.interneCislo)||'<span class="txt-muted">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const hlavicky=['Status','Dátum/čas prijatia','Typ','Obchodný partner','IČO','Číslo dodávateľa iProc','Číslo bankového účtu',
+    'Číslo faktúry','Variabilný symbol','Č. pôvodnej faktúry','Dátum faktúry','Dátum daňového dokladu','Začiatok splatnosti',
+    'Spôsob úhrady','Suma na úhradu','Čiastka faktúry','Mena','Popis','Číslo NO','Verified by','Chyba z iProc','Číslo interné']
+    .map(h=>`<th scope="col">${h}</th>`).join('');
+
+  return el(`<div>
+    <div class="uds-page-header">
+      <div>
+        <h1 class="uds-page-title">Dodávateľské faktúry</h1>
+        <p class="uds-page-meta">Prehľad prijatých faktúr od Digitálneho poštára a ich stav spracovania</p>
+      </div>
+      <div class="uds-page-actions">
+        <button class="btn btn-outlined btn-md" data-report="xls">Export xls</button>
+        <button class="btn btn-outlined btn-md" data-report="csv">Export csv</button>
+        <button class="btn btn-secondary btn-md" data-layout>Layout stĺpcov</button>
+      </div>
+    </div>
+
+    <div class="uds-widget">
+      <div class="uds-tabs" role="tablist" aria-label="Statusy faktúr">${tabs}${tabAll}</div>
+
+      <div class="uds-filters">
+        <div class="uds-field">
+          <label class="uds-label" for="fq">Vyhľadať</label>
+          <input class="uds-input" id="fq" type="search" placeholder="Číslo faktúry, partner, popis" value="${esc(S.filter.q)}">
+        </div>
+        <div class="uds-field">
+          <label class="uds-label" for="ftyp">Typ faktúry</label>
+          <select class="uds-select" id="ftyp">
+            <option value="">Všetky</option>
+            ${Object.entries(TYP).map(([k,v])=>`<option value="${k}" ${S.filter.typ===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="uds-field">
+          <label class="uds-label" for="fpar">Obchodný partner</label>
+          <input class="uds-input" id="fpar" type="text" placeholder="Názov dodávateľa" value="${esc(S.filter.partner)}">
+        </div>
+        <div class="uds-filter-actions">
+          <button class="btn btn-ghost btn-md" data-clear>Zrušiť filtre</button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <b>Legenda</b>
+        <span><span class="dot" style="background:var(--intent-success-bg)"></span>účet na faktúre aj v kmeňových dátach</span>
+        <span><span class="dot" style="background:var(--intent-warning-bg)"></span>účet iba v kmeňových dátach alebo rozdiel v sumách</span>
+        <span><span class="dot" style="background:var(--intent-danger-bg)"></span>chýbajúci povinný údaj alebo účet mimo kmeňových dát</span>
+        <span><span class="dot" style="background:var(--intent-info-bg)"></span>faktúra obsahuje viac bankových účtov</span>
+      </div>
+
+      <div class="uds-results-meta">
+        <span><strong>${data.length}</strong> ${data.length===1?'faktúra':(data.length<5?'faktúry':'faktúr')}</span>
+        <span>Aktualizované 14.08.2026 08:20</span>
+      </div>
+
+      <div class="uds-table-scroll">
+        <table class="uds-table">
+          <thead><tr>${hlavicky}</tr></thead>
+          <tbody>${riadky || `<tr><td colspan="22" style="padding:40px;text-align:center;color:var(--color-secondary)">Zadaným kritériám nevyhovuje žiadna faktúra.</td></tr>`}</tbody>
+        </table>
+      </div>
+
+      <div class="uds-pagination">
+        <div>Zobrazených ${data.length} z ${data.length} záznamov</div>
+        <div class="uds-pagination-right">
+          <button class="uds-page-btn" aria-label="Predchádzajúca strana">‹</button>
+          <span class="uds-page-num active">1</span>
+          <button class="uds-page-btn" aria-label="Nasledujúca strana">›</button>
+        </div>
+      </div>
+    </div>
+  </div>`);
+}
+
+/* interakcie zoznamu */
+document.addEventListener('click',e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(tab){ S.tab=tab.dataset.tab; render(); return; }
+  const row=e.target.closest('[data-open]');
+  if(row){ S.detailId=row.dataset.open; S.drawer=true; render(); return; }
+  if(e.target.closest('[data-clear]')){ S.filter={q:'',stav:'',typ:'',partner:''}; render(); return; }
+  const rep=e.target.closest('[data-report]');
+  if(rep){ toast('Report bol vygenerovaný vo formáte '+rep.dataset.report+'.'); return; }
+  if(e.target.closest('[data-layout]')){ toast('Layout stĺpcov bol uložený pre aktuálnu záložku.'); return; }
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='fq'){ S.filter.q=e.target.value; const p=e.target.selectionStart; render(); const n=$('#fq'); if(n){n.focus();n.setSelectionRange(p,p);} }
+  if(e.target.id==='fpar'){ S.filter.partner=e.target.value; const p=e.target.selectionStart; render(); const n=$('#fpar'); if(n){n.focus();n.setSelectionRange(p,p);} }
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='ftyp'){ S.filter.typ=e.target.value; render(); }
+});
+</script>
+<script>
+/* ============ OBRAZOVKA: detail došlej faktúry (UC-07) ============ */
+function alertProStav(f){
+  if(f.stav===2) return {t:'danger',title:'Dodávateľ nie je zaevidovaný v kmeňových dátach',
+    txt:'Zadajte požiadavku do iProc na založenie kmeňových dát, alebo manuálne dotiahnite iného dodávateľa. Aplikácia overuje kmeňové dáta automaticky o 6:00 a o 12:00.'};
+  if(f.stav===3) return {t:'danger',title:'Bankový účet nie je evidovaný v kmeňových dátach',
+    txt:'Vyberte iný účet zo zoznamu, alebo zvoľte spôsob úhrady. Odoslanie do iProc nie je v tomto stave možné.'};
+  if(f.stav===4) return {t:'warning',title:'Faktúra je vyhodnotená ako duplicita',
+    txt:(f.typ===384?'Opravná faktúra je vždy vyhodnotená ako duplicita. ':'')+'Pri oprávnenej duplicite upravte číslo faktúry a označte ju na odoslanie, inak faktúru stornujte s poznámkou.'};
+  if(f.stav===9) return {t:'danger',title:'Faktúra bola vrátená z iProc',txt:f.chybaIproc+' Opravte údaje a označte faktúru na odoslanie.'};
+  if(f.stav===10) return {t:'success',title:'Faktúra je zaevidovaná v iProc',
+    txt:'Interné číslo (voucher number): '+f.interneCislo+' · Verified by: '+f.verifiedBy+'. Údaje nie je možné editovať.'};
+  if(f.stav===8) return {t:'info',title:'Faktúra bola odoslaná do iProc',txt:'Čaká sa na potvrdenie zaevidovania.'};
+  if(f.stav===11) return {t:'warning',title:'Faktúra je pripravená na opakované odoslanie',
+    txt:'Upravte údaje vrátane čísla faktúry a označte faktúru na odoslanie. Pôvodný záznam v iProc vystornujte s dôvodom opravy vstupných dát.'};
+  if(f.stav===5) return {t:'info',title:'Faktúra je odložená',txt:f.poznamka};
+  if(f.stav===7) return {t:'info',title:'Faktúra je stornovaná',txt:'Faktúra sa neodosiela do iProc a zostáva dohľadateľná. '+f.poznamka};
+  return null;
+}
+
+function ro(label,val,cls){
+  return `<div class="field-ro"><span class="field-ro-label">${esc(label)}</span>
+    <span class="field-ro-value ${cls||''}">${val?esc(val):'<span class="txt-muted">—</span>'}</span></div>`;
+}
+function ed(f,pole,label,opts){
+  opts=opts||{};
+  const can=editovatelne(f,pole);
+  const err=opts.err;
+  const val=esc(f[pole]);
+  if(!can) return ro(label,f[pole],opts.cls);
+  return `<div class="field-ed ${err?'field-err':''}">
+    <label class="uds-label" for="ed_${pole}">${esc(label)} <span class="status-label">editovateľné</span></label>
+    <input class="uds-input" id="ed_${pole}" data-edit="${pole}" value="${val}">
+    ${err?`<span class="helper-err">${esc(err)}</span>`:(opts.help?`<span class="helper">${esc(opts.help)}</span>`:'')}
+  </div>`;
+}
+
+function viewDetail(){
+  const f=F(S.detailId);
+  const a=alertProStav(f);
+  const fu=farbaUctu(f);
+  const povolene=PRECHODY[f.stav]||[];
+  const kont=kontroly(f);
+
+  const uctyOpts=(()=> {
+    const zoznam=[...(f.ucty||[])].sort((x,y)=>((y.tb&&y.vOds)?1:0)-((x.tb&&x.vOds)?1:0));
+    if(!zoznam.find(u=>u.iban===VSEOB_UCET)) zoznam.push({iban:VSEOB_UCET,vFa:false,vOds:true,tb:true,vseob:true});
+    return zoznam.map(u=>{
+      const popis=u.vseob?'všeobecný účet':(u.vFa&&u.vOds?'na faktúre aj v kmeňových dátach':(u.vOds?'iba v kmeňových dátach':'iba na faktúre'));
+      return `<option value="${esc(u.iban)}" ${f.ucet===u.iban?'selected':''}>${esc(u.iban)} — ${popis}${u.tb&&!u.vseob?', vedený v TB':''}</option>`;
+    }).join('');
+  })();
+
+  return el(`<div>
+    <nav class="uds-breadcrumb" aria-label="Navigačná cesta">
+      <button data-back>Dodávateľské faktúry</button>
+      <span class="uds-breadcrumb-sep" aria-hidden="true">›</span>
+      <span class="uds-breadcrumb-current" aria-current="page">${esc(f.cisloFaktury)}</span>
+    </nav>
+
+    <div class="uds-page-header">
+      <div>
+        <h1 class="uds-page-title">Faktúra ${esc(f.cisloFaktury)}</h1>
+        <p class="uds-page-meta">${esc(f.partner)} · prijatá ${esc(f.datumPrijatia)}</p>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          ${pill(f.stav)}
+          <span class="uds-pill uds-pill-md uds-pill-inactive">${esc(TYP[f.typ])}</span>
+          ${viacUctov(f)?'<span class="uds-pill uds-pill-md uds-pill-info">Viac bankových účtov</span>':''}
+          ${jeTarchopis(f)&&f.typ!==383?'<span class="uds-pill uds-pill-md uds-pill-warning">Spracované ako ťarchopis</span>':''}
+        </div>
+      </div>
+      <div class="uds-page-actions">
+        <button class="btn btn-outlined btn-md" data-drawer>${IC.doc} ${S.drawer?'Skryť obraz faktúry':'Obraz faktúry'}</button>
+      </div>
+    </div>
+
+    ${a?`<div class="uds-alert uds-alert-${a.t}">${IC[a.t==='success'?'ok':(a.t==='info'?'info':(a.t==='warning'?'warn':'stop'))]}
+      <span><span class="uds-alert-title">${esc(a.title)}</span>${esc(a.txt)}</span></div>`:''}
+
+    <div class="detail-grid">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <section class="uds-widget">
+          <div class="uds-widget-header"><h2 class="uds-widget-title">Výsledky kontrol</h2></div>
+          <div class="uds-widget-body">
+            <ul class="check-list">
+              ${kont.map(k=>`<li class="check-item">
+                <span class="check-icon check-${k.res==='ok'?'ok':(k.res==='warn'?'warn':'stop')}">${IC[k.res==='ok'?'ok':(k.res==='warn'?'warn':'stop')]}</span>
+                <span><span class="check-name">${esc(k.n)}</span>
+                  <span class="check-detail" style="display:block">${esc(k.d)}</span>
+                  ${k.ods?`<span class="check-ods">Hodnota v kmeňových dátach: ${esc(k.ods)}</span>`:''}</span>
+              </li>`).join('')}
+            </ul>
+          </div>
+        </section>
+
+        <section class="uds-widget">
+          <div class="uds-widget-header"><h2 class="uds-widget-title">História zmien</h2></div>
+          <div class="uds-widget-body">
+            ${f.historia.length?f.historia.map(h=>`<div class="hist-item">
+              <div class="hist-field">${esc(h.pole)}</div>
+              <div class="hist-vals"><span class="hist-old">${esc(h.stare)}</span> → <span class="hist-new">${esc(h.nove)}</span></div>
+              <div class="hist-meta">${esc(h.kto)} · ${esc(h.kedy)}</div>
+            </div>`).join(''):'<p style="margin:0;color:var(--color-secondary)">K faktúre zatiaľ neboli vykonané žiadne zmeny.</p>'}
+          </div>
+        </section>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <section class="uds-widget">
+          <div class="uds-widget-header"><h2 class="uds-widget-title">Údaje faktúry</h2></div>
+          <div class="uds-widget-body">
+            <div class="fields-grid">
+              ${ro('Dodávateľská faktúra',f.oznacenie)}
+              ${ro('Dátum/čas prijatia faktúry',f.datumPrijatia)}
+              ${ro('Obchodný partner',f.partner)}
+              ${ro('IČO / IČ DPH',f.ico+' | '+f.icdph)}
+              ${ro('Číslo dodávateľa iProc',f.oracleId)}
+              ${ro('Číslo dodávateľa SAP',f.sapId)}
+              ${ed(f,'cisloFaktury','Číslo faktúry')}
+              ${ed(f,'vs','Variabilný symbol',{help:f.vsAuto?'Doplnený automaticky z čísla faktúry.':''})}
+              ${ed(f,'cPovodnej','Č. pôvodnej faktúry',{err:cpfChyba(f)?'Povinné pri dobropise a ťarchopise.':null})}
+              ${ro('Dátum faktúry',f.datumFaktury)}
+              ${ed(f,'datumDanDokl','Dátum daňového dokladu',{help:(f.typ===381||f.typ===383||jeTarchopis(f))?'Prednastavený dátumom prijatia faktúry.':''})}
+              ${ro('Začiatok splatnosti',f.splatnost)}
+              ${ro('Mena',f.mena)}
+              ${ro('Suma na úhradu',f.sumaNaUhradu+' '+f.mena,sumaOdlisna(f)?'txt-warning':'')}
+              ${ro('Čiastka faktúry',f.ciastka+' '+f.mena)}
+              ${ed(f,'zakladDane','Základ dane',{help:f.typ===386?'Pri zálohovej faktúre nemá byť vyčíslený.':''})}
+              ${ed(f,'vyskaDane','Výška dane',{help:f.typ===386?'Pri zálohovej faktúre nemá byť vyčíslená.':''})}
+              ${ed(f,'cisloNO','Číslo NO')}
+              ${ed(f,'cisloZmluvy','Číslo zmluvy')}
+              ${ro('Verified by',f.verifiedBy)}
+              ${ro('Číslo interné',f.interneCislo)}
+            </div>
+
+            <div style="margin-top:24px" class="bank-box ${viacUctov(f)?'flag-multi':''}">
+              <div class="section-header"><h3 class="section-title">Bankové spojenie</h3>
+                ${viacUctov(f)?'<span class="uds-pill uds-pill-sm uds-pill-info">Faktúra obsahuje viac účtov</span>':''}</div>
+              <div class="field-ed">
+                <label class="uds-label" for="edUcet">Číslo bankového účtu <span class="status-label">editovateľné</span></label>
+                <select class="uds-select ${fu.cls}" id="edUcet" data-ucet ${editovatelne(f,'ucet')?'':'disabled'}>${uctyOpts}</select>
+                <span class="helper ${fu.cls}">${esc(fu.txt)}</span>
+              </div>
+              <div class="field-ed" style="margin-top:12px">
+                <label class="uds-label" for="edUhrada">Spôsob úhrady <span class="status-label">editovateľné</span></label>
+                <select class="uds-select" id="edUhrada" data-uhrada ${editovatelne(f,'sposobUhrady')?'':'disabled'}>
+                  ${Object.entries(UHRADA).map(([k,v])=>`<option value="${k}" ${String(f.sposobUhrady)===k?'selected':''}>${v}</option>`).join('')}
+                </select>
+              </div>
+              ${f.remittance?`<div class="bank-note"><strong>Remittance information / Invoice note:</strong> ${esc(f.remittance)}</div>`:''}
+            </div>
+
+            <div class="field-ed" style="margin-top:24px">
+              <label class="uds-label" for="edPopis">Popis <span class="status-label">editovateľné</span></label>
+              <textarea class="uds-input" id="edPopis" data-edit="popis" rows="2" ${editovatelne(f,'popis')?'':'disabled'}>${esc(f.popis)}</textarea>
+            </div>
+            <div class="field-ed" style="margin-top:16px">
+              <label class="uds-label" for="edPozn">Poznámka spracovateľa <span class="status-label">editovateľné</span></label>
+              <textarea class="uds-input" id="edPozn" data-edit="poznamka" rows="2">${esc(f.poznamka)}</textarea>
+              <span class="helper">Povinná pri odložení, storne a opakovanom odoslaní.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="uds-widget">
+          <div class="uds-widget-header"><h2 class="uds-widget-title">Ostatné údaje z faktúry</h2></div>
+          <div class="uds-widget-body" style="padding:0">
+            <table class="xml-table"><tbody>
+              ${f.ostatneXml.map(([k,v])=>`<tr><td class="xml-key">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}
+            </tbody></table>
+          </div>
+        </section>
+
+        <div class="actions-bar">
+          <button class="btn btn-primary btn-md" data-akcia="6" ${povolene.includes(6)?'':'disabled'}>${IC.send} Na odoslanie</button>
+          <button class="btn btn-outlined btn-md" data-akcia="5" ${povolene.includes(5)?'':'disabled'}>${IC.pause} Odložiť</button>
+          <button class="btn btn-danger-outlined btn-md" data-akcia="7" ${povolene.includes(7)?'':'disabled'}>${IC.ban} Stornovať</button>
+          ${povolene.includes(1)?`<button class="btn btn-ghost btn-md" data-akcia="1">${IC.redo} Vrátiť na spracovanie</button>`:''}
+          ${povolene.includes(11)?`<button class="btn btn-outlined btn-md" data-akcia="11">${IC.redo} Opraviť a odoslať znovu</button>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`);
+}
+</script>
+<script>
+/* ============ interakcie detailu ============ */
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-back]')){ S.detailId=null; S.drawer=false; render(); return; }
+  if(e.target.closest('[data-drawer]')){ S.drawer=!S.drawer; render(); return; }
+  const ak=e.target.closest('[data-akcia]');
+  if(ak && !ak.disabled){ akcia(Number(ak.dataset.akcia)); return; }
+});
+document.addEventListener('input',e=>{
+  const p=e.target.dataset&&e.target.dataset.edit;
+  if(!p||!S.detailId) return;
+  const f=F(S.detailId);
+  f['_tmp_'+p]=e.target.value;
+});
+document.addEventListener('focusin',e=>{
+  const p=e.target.dataset&&e.target.dataset.edit;
+  if(p&&S.detailId){ S.focusField=p; renderDrawer(); }
+});
+document.addEventListener('focusout',e=>{
+  const p=e.target.dataset&&e.target.dataset.edit;
+  if(!p||!S.detailId) return;
+  const f=F(S.detailId);
+  let nova=e.target.value;
+  if(p==='cisloFaktury' && nova.includes(' ')){ nova=nova.replace(/\s+/g,''); toast('Z čísla faktúry boli odstránené medzery.'); }
+  if(f[p]!==nova){ const stara=f[p]; f[p]=nova; log(f,e.target.previousElementSibling?e.target.closest('.field-ed').querySelector('.uds-label').childNodes[0].textContent.trim():p,stara,nova); render(); }
+  S.focusField=null; renderDrawer();
+});
+document.addEventListener('change',e=>{
+  if(!S.detailId) return;
+  const f=F(S.detailId);
+  if(e.target.dataset.ucet!==undefined){
+    const stary=f.ucet; f.ucet=e.target.value; log(f,'Číslo bankového účtu',stary,f.ucet);
+    const u=(f.ucty||[]).find(x=>x.iban===f.ucet);
+    const vOds = f.ucet===VSEOB_UCET || (u&&u.vOds);
+    if(!vOds && f.stav!==3){ const s=f.stav; f.stav=3; log(f,'Status faktúry',STAV[s].n,STAV[3].n,'Systém');
+      toast('Vybraný účet nie je evidovaný v kmeňových dátach - faktúra bola preradená do stavu 3.'); }
+    else if(vOds && f.stav===3){ f.stav=1; log(f,'Status faktúry',STAV[3].n,STAV[1].n,'Systém');
+      toast('Kontrola bankového spojenia prebehla úspešne - faktúra je v stave 1.'); }
+    else toast('Bankový účet bol zmenený.');
+    render(); return;
+  }
+  if(e.target.dataset.uhrada!==undefined){
+    const stary=f.sposobUhrady; f.sposobUhrady=Number(e.target.value);
+    log(f,'Spôsob úhrady',UHRADA[stary],UHRADA[f.sposobUhrady]);
+    if(f.sposobUhrady>1 && f.ucet!==VSEOB_UCET){
+      log(f,'Číslo bankového účtu',f.ucet,VSEOB_UCET,'Systém'); f.ucet=VSEOB_UCET;
+      if(f.stav===3){ f.stav=1; log(f,'Status faktúry',STAV[3].n,STAV[1].n,'Systém'); }
+      toast('Priradený účet '+VSEOB_UCET+'. Kontrola bankového spojenia je vyhodnotená ako validná.');
+    }
+    render(); return;
+  }
+});
+
+/* ============ akcie nad faktúrou ============ */
+function akcia(cielovy){
+  const f=F(S.detailId);
+  if(cielovy===6){
+    if(cpfChyba(f)){ toast('Vyplňte pole Č. pôvodnej faktúry - pri dobropise a ťarchopise je povinné.'); return; }
+    if(farbaUctu(f).cls==='txt-danger'){ toast('Bankový účet nie je evidovaný v kmeňových dátach. Vyberte iný účet alebo zvoľte spôsob úhrady.'); return; }
+    const s=f.stav; f.stav=6; f.verifiedBy=TB; f.chybaIproc='';
+    log(f,'Status faktúry',STAV[s].n,STAV[6].n);
+    toast('Faktúra je označená na odoslanie. Prebieha odosielanie do iProc.');
+    render();
+    setTimeout(()=>{ f.stav=8; log(f,'Status faktúry',STAV[6].n,STAV[8].n,'Systém'); if(S.detailId===f.id) render(); },900);
+    setTimeout(()=>{ const v='6026'+Math.floor(10000+Math.random()*89999);
+      f.stav=10; f.interneCislo=v; log(f,'Status faktúry',STAV[8].n,STAV[10].n,'Systém');
+      log(f,'Číslo interné','',v,'Systém');
+      toast('Faktúra bola zaevidovaná v iProc. Interné číslo: '+v);
+      if(S.detailId===f.id) render(); },2000);
+    return;
+  }
+  if(cielovy===1){ const s=f.stav; f.stav=1; log(f,'Status faktúry',STAV[s].n,STAV[1].n); toast('Faktúra bola vrátená na spracovanie.'); render(); return; }
+  const titulky={5:'Odložiť faktúru',7:'Stornovať faktúru',11:'Opraviť a odoslať znovu'};
+  openModal(titulky[cielovy]+' '+f.cisloFaktury, f.poznamka, (txt)=>{
+    const s=f.stav; f.stav=cielovy;
+    const stara=f.poznamka;
+    f.poznamka = f.poznamka ? f.poznamka+' | '+txt : txt;
+    log(f,'Poznámka spracovateľa',stara,f.poznamka);
+    log(f,'Status faktúry',STAV[s].n,STAV[cielovy].n);
+    const spravy={5:'Faktúra bola odložená.',7:'Faktúra bola stornovaná.',
+      11:'Údaje faktúry sú odomknuté na opravu. Po úprave označte faktúru na odoslanie.'};
+    toast(spravy[cielovy]);
+    if(cielovy===7){ S.detailId=null; S.drawer=false; }
+    closeModal(); render();
+  });
+}
+
+/* ============ modal ============ */
+function openModal(title,existujuca,onSave){
+  const m=el(`<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title" id="mTitle">${esc(title)}</h2></div>
+      <div class="modal-body">
+        <p style="margin:0;color:var(--color-secondary);font-size:var(--font-size-sm)">
+          Poznámka spracovateľa je pre túto zmenu povinná.${existujuca?' Existujúca poznámka zostane zachovaná.':''}</p>
+        ${existujuca?`<div class="bank-note">Doterajšia poznámka: ${esc(existujuca)}</div>`:''}
+        <div class="field-ed">
+          <label class="uds-label" for="mTxt">Poznámka spracovateľa</label>
+          <textarea class="uds-input" id="mTxt" rows="3" placeholder="Informácia o spôsobe riešenia položky"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-md" data-mclose>Zrušiť</button>
+        <button class="btn btn-primary btn-md" data-msave disabled>Uložiť a pokračovať</button>
+      </div>
+    </div></div>`);
+  $('#modalHost').appendChild(m);
+  const ta=m.querySelector('#mTxt'), save=m.querySelector('[data-msave]');
+  ta.focus();
+  ta.addEventListener('input',()=>{ save.disabled=!ta.value.trim(); });
+  save.addEventListener('click',()=>onSave(ta.value.trim()));
+  m.querySelector('[data-mclose]').addEventListener('click',closeModal);
+  m.addEventListener('click',ev=>{ if(ev.target===m) closeModal(); });
+  document.addEventListener('keydown',escClose);
+}
+function escClose(e){ if(e.key==='Escape') closeModal(); }
+function closeModal(){ $('#modalHost').innerHTML=''; document.removeEventListener('keydown',escClose); }
+
+/* ============ obraz faktúry ============ */
+function hl(key,txt){ return S.focusField===key?`<span class="hl">${esc(txt)}</span>`:esc(txt); }
+function renderDrawer(){
+  const host=$('#drawerHost');
+  if(!S.detailId||!S.drawer){ host.innerHTML=''; return; }
+  const f=F(S.detailId);
+  const uctyFa=(f.ucty||[]).filter(u=>u.vFa);
+  host.innerHTML='';
+  host.appendChild(el(`<aside class="drawer open" aria-label="Obraz faktúry">
+    <div class="drawer-header">
+      <h2 class="uds-widget-title">Obraz faktúry</h2>
+      <button class="btn btn-ghost btn-sm" data-drawer aria-label="Zavrieť obraz faktúry">Zavrieť</button>
+    </div>
+    <div class="drawer-body">
+      <div class="paper">
+        <div class="paper-head">
+          <div>
+            <div class="paper-sub">Faktúra - daňový doklad</div>
+            <p class="paper-title">${hl('cisloFaktury',f.cisloFaktury)}</p>
+            <div class="paper-sub" style="margin-top:4px">${esc(TYP[f.typ])}</div>
+          </div>
+          <div style="text-align:right;font-size:12px">
+            <div>Dátum vystavenia: ${esc(f.datumFaktury)}</div>
+            <div>Dátum dodania: ${hl('datumDanDokl',f.datumDanDokl)}</div>
+            <div>Splatnosť: ${esc(f.splatnost)}</div>
+          </div>
+        </div>
+        <div class="paper-grid">
+          <div><div class="paper-sub">Dodávateľ</div><strong>${esc(f.partner)}</strong>
+            <div>IČO ${esc(f.ico)} · IČ DPH ${esc(f.icdph)}</div></div>
+          <div><div class="paper-sub">Odberateľ</div><strong>Tatra banka, a.s.</strong>
+            <div>IČ DPH ${esc(f.icdphOdb)}</div></div>
+        </div>
+        <div style="margin-top:16px;padding:10px;background:#F4F4F5;border-radius:4px;font-size:12px">
+          <div class="paper-sub">Platobné údaje</div>
+          ${uctyFa.length?uctyFa.map(u=>`<div>${hl('ucet',u.iban)}${u.tb?' (účet vedený v TB)':''}</div>`).join(''):`<div>${hl('ucet',f.ucet)}</div>`}
+          <div>VS ${hl('vs',f.vs)}</div>
+        </div>
+        <table class="paper-table">
+          <thead><tr><th>Položka</th><th style="text-align:right">Suma</th></tr></thead>
+          <tbody>${(f.polozky||[]).map(p=>`<tr><td>${esc(p.p)}</td><td style="text-align:right">${esc(p.c)}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="paper-total">
+          <div style="font-size:12px">
+            <div class="paper-sub">Rozpis DPH</div>
+            <div>Základ ${hl('zakladDane',f.zakladDane)} · daň ${hl('vyskaDane',f.vyskaDane)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="paper-sub">Suma na úhradu</div>
+            <div style="font-size:20px;font-weight:700">${esc(f.sumaNaUhradu)} ${esc(f.mena)}</div>
+          </div>
+        </div>
+        ${f.popis?`<div style="margin-top:16px;font-size:12px;border-top:1px solid rgba(0,0,0,.1);padding-top:8px">
+          Text faktúry: ${hl('popis',f.popis)}</div>`:''}
+        ${f.remittance?`<div style="margin-top:6px;font-size:12px">Remittance information / Invoice note: ${hl('ucet',f.remittance)}</div>`:''}
+      </div>
+      <p class="drawer-hint">Pri prechode tabulátorom po editovateľných poliach sa v obraze faktúry podsvieti zdroj údaja.</p>
+    </div>
+  </aside>`));
+}
+</script>
+<script>
+/* ============ OBRAZOVKA: odberateľské faktúry ============ */
+function viewOdberatelske(){
+  const pillPreStatus=(s)=>{
+    if(s==='Doručená') return 'uds-pill-success';
+    if(s==='U poštára') return 'uds-pill-info';
+    if(s==='Zamietnutá poštárom') return 'uds-pill-danger';
+    return 'uds-pill-inactive';
+  };
+  const riadky=ODBERATELSKE.map(o=>`<tr>
+    <td>Odberateľská faktúra</td>
+    <td>${esc(o.datum)}</td>
+    <td>${esc(o.zdroj)}</td>
+    <td>${o.peppol==='Áno'?'<span class="uds-pill uds-pill-sm uds-pill-success">Áno</span>':'<span class="uds-pill uds-pill-sm uds-pill-inactive">Nie</span>'}</td>
+    <td>${esc(o.odoslane)}</td>
+    <td>${esc(o.odpoved)}</td>
+    <td><span class="uds-pill uds-pill-sm ${pillPreStatus(o.status)}">${esc(o.status)}</span></td>
+    <td>${o.pozn?esc(o.pozn):'<span class="txt-muted">—</span>'}</td>
+  </tr>`).join('');
+
+  return el(`<div>
+    <div class="uds-page-header">
+      <div>
+        <h1 class="uds-page-title">Odberateľské faktúry</h1>
+        <p class="uds-page-meta">Prehľad faktúr prijatých z interných aplikácií a ich doručenie cez Digitálneho poštára</p>
+      </div>
+      <div class="uds-page-actions">
+        <button class="btn btn-outlined btn-md" data-report="xls">Export xls</button>
+      </div>
+    </div>
+
+    <div class="uds-widget">
+      <div class="uds-results-meta">
+        <span><strong>${ODBERATELSKE.length}</strong> faktúr</span>
+        <span>Aktualizované 14.08.2026 08:20</span>
+      </div>
+      <div class="uds-table-scroll">
+        <table class="uds-table" style="min-width:1100px">
+          <thead><tr>
+            <th scope="col">Odberateľská faktúra</th>
+            <th scope="col">Dátum/čas prijatia</th>
+            <th scope="col">Zdrojová aplikácia</th>
+            <th scope="col">Doručenie cez Peppol</th>
+            <th scope="col">Dátum odoslania poštárovi</th>
+            <th scope="col">Dátum odpovede od poštára</th>
+            <th scope="col">Status faktúry od poštára</th>
+            <th scope="col">Poznámka k odoslaniu</th>
+          </tr></thead>
+          <tbody>${riadky}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`);
+}
+
+/* ============ OBRAZOVKA: administratíva ============ */
+function viewAdmin(){
+  return el(`<div>
+    <div class="uds-page-header">
+      <div>
+        <h1 class="uds-page-title">Administratíva</h1>
+        <p class="uds-page-meta">Nastavenia aplikácie a správa prístupov</p>
+      </div>
+    </div>
+    <div class="uds-widget">
+      <div class="empty">
+        <span class="empty-icon">${IC.box}</span>
+        <h3>Obsah sekcie nie je súčasťou tejto ukážky</h3>
+        <p>Ukážka je zameraná na prehľad dodávateľských faktúr a detail došlej faktúry. Rozsah administratívnej sekcie doplníme po jej vyšpecifikovaní.</p>
+        <button class="btn btn-primary btn-md" data-nav="dodavatelske">Prejsť na dodávateľské faktúry</button>
+      </div>
+    </div>
+  </div>`);
+}
+
+render();
+</script>
+</body>
+</html>
