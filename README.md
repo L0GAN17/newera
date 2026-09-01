@@ -435,120 +435,101 @@ Zapracoval som to do BP05 a do Opisu obrazoviek, kam to vecne patrí. Otázku na
 
 Ak to chceš dotiahnuť, stačí krátko:
 
-```
-Ahoj Feri, este raz k tomu zapornemu halierovemu - odpovedal si mi ohladom potvrdenky a to mam zapracovane, dakujem. Ale isiel som este na to uctovanie: pri kladnom rozlisujeme ci sa uctuje voci klientskemu uctu alebo voci pokladni. Plati to iste rozlisenie aj pri zapornom, alebo ide zaporne vzdy voci klientskemu uctu?
-```
+Táto odpoveď uzatvára BP06 a dáva mu konkrétnu logiku aj s príkladmi. Feri zároveň pridal vetu, ktorá vysvetľuje **prečo** to tak je - cieľom je vždy účtovne dorovnať transakciu po zaokrúhlení.
 
-Prešiel som otvorené body naprieč UC. Ferimu patrí týchto trinásť. Zoradil som ich podľa toho, čo blokuje najviac.
+## Sekcie na prekopírovanie do UC0416
 
----
-
-## Blokuje dokončenie UC
-
-### UC0403 - Natypovanie transakcie (4 otázky)
+### Otvorené otázky - presunúť oba body o smere medzi vyriešené
 
 ```
-Ahoj Feri, k UC0403 mi ostali styri veci:
-
-1. Stanovil si limity a nasobky pre EUR, CZK, GBP, HUF, CHF, PLN a USD. CashBox ale pracuje aj s dalsimi menami - AUD, CAD, DKK, JPY, NOK, RON, SEK a ZAR. NOK sam pouzivas v priklade, takze s nou pocitas. Potrebujem limit a nasobok aj pre tieto meny, alebo mi potvrd ze sa s nimi v CashBoxe nepracuje.
-
-2. Urcil si ze pri EUR a ucte v EUR su obe policka na 2 desatinne miesta. Ale co ked je hotovost v EUR a ucet je vedeny v cudzej mene? Tu kombinaciu sam uvadzas v tabulke kurzov ako "vklad EUR na ucet vedeny v CM", takze realne nastava, ale pravidlo pre nu nemam.
-
-3. Rozdiely v obrazovke podla typu transakcie si napisal ze su vo Figme. Vies mi poslat odkaz? Potrebujem ich do UC prepisat, aby to vyvojar aj tester vedeli precitat z jedneho dokumentu bez toho aby museli otvarat Figmu.
-
-4. Pri nespravnom formate zadanych udajov (zle symboly, suma co nie je nasobok, suma nad limit) nemam schvalenu hlasku v katalogu. Vies mi navrhnut textaciu a dat jej kod?
+~~Smer účtovania pri zápornom vyrovnaní podľa miesta vzniku rozdielu~~ → VYRIEŠENÉ (Feri): rozlíšenie protistrany podľa miesta vzniku rozdielu platí pri kladnom aj zápornom halierovom vyrovnaní. Protistranou je klientsky účet alebo pokladňa podľa toho, kde rozdiel vznikol. Cieľom je vždy účtovne dorovnať transakciu po zaokrúhlení. Podrobnosti sú v BP06.
 ```
 
-### UC0416 - Halierové vyrovnanie (1 otázka)
+Zvyšné dva otvorené body o BP06, teda technické rozpoznanie prípadu a naplnenie polí, zostávajú.
+
+### BP06 - nahradiť celé
 
 ```
-Ahoj Feri, k halierovemu vyrovnaniu mi ostala uz len jedna vec.
+### BP06 - Protistrana a smer účtovania
 
-Napisal si ze protistrana zavisi od toho ci rozdiel vznikol na strane uctu alebo na strane pokladne, a to chapem. Ale potrebujem vediet podla coho to ma system rozpoznat - podla akeho konkretneho udaja alebo priznaku sa rozhodne ze ide o jeden alebo o druhy pripad.
+Protistrana aj smer účtovania závisia od toho, kde drobný rozdiel vznikol. Rozlíšenie platí pri kladnom aj zápornom halierovom vyrovnaní (potvrdil Feri).
 
-Bez toho to vyvojar nevie naprogramovat a tester nevie vyvolat ani jeden z tych scenarov.
+**Cieľ účtovania.** Cieľom halierového vyrovnania je vždy účtovne dorovnať transakciu po zaokrúhlení, aby účtovné záznamy sedeli.
+
+| Miesto vzniku rozdielu | Protistrana | Smer účtovania |
+|---|---|---|
+| Rozdiel vznikol na strane účtu, teda účet sa dotuje kvôli transakcii | Klientsky účet | Debet alebo kredit klientskeho účtu proti účtu halierového vyrovnania, podľa toho, na ktorú stranu treba transakciu dorovnať |
+| Rozdiel vznikol na strane pokladne, teda transakcia sa očisťuje z pokladne | Pokladňa | Debet alebo kredit pokladne proti účtu halierového vyrovnania, podľa toho, na ktorú stranu treba transakciu dorovnať |
+
+Druhou stranou účtovacieho pokynu je v oboch prípadoch cudzomenový výnosový účet banky pre halierové vyrovnanie podľa meny, v ktorej rozdiel vznikol (viď sekcia API, časť Účty pre halierové vyrovnanie).
+
+**Príklad 1, rozdiel na strane účtu.** Klient realizuje výber a systém mu z účtu odpísal o 0,02 CZK viac, než mala byť reálna hodnota. Klienta je preto potrebné nadotovať o 0,02 CZK ako halierové vyrovnanie. Účtuje sa účet halierového vyrovnania proti klientskemu účtu, teda kredit klientskeho účtu.
+
+**Príklad 2, rozdiel na strane pokladne.** Klient realizuje vklad a rozdiel vznikne na strane pokladne. Účtuje sa pokladňa proti účtu halierového vyrovnania, teda debet alebo kredit pokladne podľa smeru dorovnania.
+
+[OTVORENY BOD: podľa akého konkrétneho údaja alebo príznaku systém vyhodnotí, či rozdiel vznikol na strane účtu alebo na strane pokladne]
 ```
 
-### UC0402 - Overenie klienta (3 otázky)
+### Hlavný tok - nahradiť krok 6
 
 ```
-Ahoj Feri, k UC0402 mi ostali tri veci:
-
-1. Krajina vystavenia dokladu - GateGlobal to pole nema. Ma to teller vzdy vyplnat rucne z listboxu (mam tam ODS_SA.CCD_COUNTRY), alebo existuje nejaky iny zdroj?
-
-2. GateGlobal vracia priznaky ktore dnes nepouzivame - black list, blokovana obsluha klienta, umrtie klienta a evidovana exekucia. Mame ich v CashBoxe vyhodnocovat? Ak ano tak s akym dosledkom - blokuje to transakciu alebo len flagujeme?
-
-3. Ked GateGlobal vypadne tak uz nemame kam ist, lebo SubReg sa pre CashBox nepouziva. Cize transakcia jednoducho nemoze pokracovat, alebo moze teller vyplnit vsetky udaje o osobe rucne a ist dalej? Ak by mohol tak potrebujem vediet ako sa overi ci je klient a ci je whitelistovany, ked to nemame z coho zistit.
+6. Systém určí protistranu a smer účtovania podľa BP06:
+   - Ak rozdiel vznikol na strane účtu, protistranou je klientsky účet
+   - Ak rozdiel vznikol na strane pokladne, protistranou je pokladňa
+   
+   Smer účtovania, teda debet alebo kredit protistrany, systém určí tak, aby sa transakcia účtovne dorovnala po zaokrúhlení. Druhou stranou pokynu je cudzomenový výnosový účet banky podľa meny, v ktorej rozdiel vznikol (viď sekcia API, časť Účty pre halierové vyrovnanie).
 ```
 
-### UC0417 - Zaúčtovanie transakcie (3 otázky)
+### Biznis zadanie - nahradiť odsek Smer účtovania
 
 ```
-Ahoj Feri, k UC0417 mam tri veci:
-
-1. Este raz k tomu AT3, lebo si sa pytal co je tym myslene. Je to situacia ked CBS transakciu spravne zauctuje, klient uz ma peniaze aj potvrdenie a odide, ale zlyha zapis do nasej lokalnej databazy. Cize transakcia v banke presla, ale my o nej nemame zaznam v zurnale.
-
-Moj navrh je ze teller o tom nic nevidi - dostane normalnu hlasku o uspechu, lebo z jeho aj klientovho pohladu vsetko prebehlo spravne a aj tak s tym nemoze nic spravit. Riesi sa to JIRA ticketom na pozadi a zapis sa doplni dodatocne. Suhlasis, alebo by mal teller vediet ze sa nieco stalo?
-
-2. Ked sa dodatocne zisti ze transakcia skoncila chybou a klient uz davno odisiel s potvrdenim - moj navrh je ze system to automaticky neriesi, len vytvori incident a doriesenie je na prevadzke, lebo ci sa ma douctovat alebo stornovat je uctovne rozhodnutie. Sedi to?
-
-3. Opakovane spracovanie nespracovanych transakcii - napisal si ze to ma byt sucastou UC0417 alebo samostatneho UC na spracovanie otvorenych txn. Vies rozhodnut ktore z toho? A este interval - napisal si ze minimalne pri zatvoreni pokladne a idealne aj pocas dna. Ja som navrhol 15 minut a max 10 pokusov, ale su to cisla co som si vymyslel. Mas s tym skusenost?
+**Smer účtovania.** Protistrana aj smer účtovania závisia od toho, kde drobný rozdiel vznikol, teda či na strane účtu alebo na strane pokladne. Rozlíšenie platí pri kladnom aj zápornom vyrovnaní. Cieľom je vždy účtovne dorovnať transakciu po zaokrúhlení. Pravidlá sú v BP06.
 ```
 
-### UC0401 - Overenie čísla účtu (1 otázka)
+### Vstupné podmienky - nahradiť poslednú odrážku
 
 ```
-Ahoj Feri, k UC0401 mi treba schvalit jednu hlasku.
-
-Ked je cislo uctu tvarovo spravne ale ucet v CBS neexistuje, navrhujem vlastnu hlasku "Zadane cislo uctu neexistuje" namiesto E027 co je pre zly tvar. Teller tak vie ci ma preklep alebo ucet naozaj neexistuje.
-
-V katalogu taka hlaska nie je, navrhujem kod W014. Vies to schvalit a doplnit do katalogu?
+- Je známe, kde drobný rozdiel vznikol, teda či na strane účtu alebo na strane pokladne (BP06) [OTVORENY BOD: technické rozpoznanie prípadu]
 ```
 
----
-
-## Neblokujúce, ale otvorené
+### Tabuľka kontrol - nahradiť riadok 5
 
 ```
-Ahoj Feri, este par mensich veci ked budes mat cas:
+| 5 | Určenie protistrany a smeru | CashBox lokálne | Je vyhodnotené, kde rozdiel vznikol, a podľa toho určená protistrana a smer účtovania (BP06) | Chyba prípravy pokynu | Vyvolať vklad s rozdielom na strane pokladne a výber s rozdielom na strane účtu, porovnať pripravené pokyny |
+```
 
-1. UC0402 - v UC701 sa pri rozmieňani v mene firmy odvolavam na sekciu Iny subjekt a vo Figme je ta sekcia priamo v modali Overenie osoby. Ale z UC0402 sme ju vyhodili, takze dnes to nie je popisane nikde. Kde sa to ma riesit? V UC701 mam len zmienku ze sa vyplna, ale nie odkial sa udaje o firme beru.
+### API - nahradiť riadok v tabuľke mapovania polí
 
-2. UC0402 - v zozname UC je UC0407 Overenie klienta manualne pre nedostupny GATE. To co mam v UC0402 ako alternativny tok (priamy vstup bez prekliku) je vlastne to iste. Ktore z toho plati?
+```
+| debit_part / credit_part | Podľa BP06. Jednou stranou je cudzomenový výnosový účet banky pre halierové vyrovnanie podľa meny, druhou stranou je klientsky účet alebo pokladňa podľa miesta vzniku rozdielu. Smer sa určí tak, aby sa transakcia účtovne dorovnala |
+```
 
-3. UC0402 - potrebujem vediet cim teller uzavrie overenie osoby. Vo Figme pri rozmieňani ma ten modal tlacidla Zrusit a Potvrdit. Plati to iste aj pre UC0402? Ma byt Potvrdit neaktivne kym nie su vyplnene povinne polia, ako to mame v UC0403? A co sa stane ked da Zrusit?
+### API - nahradiť poznámku pod tabuľkou mapovania
 
-4. UC0403 - povinny konstantny symbol si napisal ze s nim zatial nepocitame. Chcem sa uistit ze to mozem do UC napisat natvrdo, teda ze pole je vzdy nepovinne.
+```
+[OTVORENY BOD: konkrétne naplnenie polí debit_part a credit_part pre všetky kombinácie miesta vzniku rozdielu a smeru dorovnania podľa BP06. Prejsť s Matejom Pastuchom, prípadne overiť s Magdou Tibenskou]
+```
 
-5. UC0417 - pri hromadnom vklade si napisal ze suhrnna hlaska dnes nie je ale mozeme ju vymysliet. Ma ju CashBox mat, alebo to nechame tak ako je?
+### Mapping - nahradiť riadok var_data
 
-6. UC0417 - SLA pre riesenie incidentu si napisal ze musia byt extremne prisne ale asi sa to este nenastavovalo. Vies mi dat konkretne hodnoty, alebo to mam nechat na prevadzku?
-
-7. UC0417 - ked sa nepodari vytvorit JIRA ticket, mam tam ze sa to zapise do logu a zurnalu. Ma system navyse niekoho aktivne notifikovat?
+```
+| `var_data` | Konsolidačný kľúč hlavnej transakcie, kurz, skutočná a ekvivalentná hodnota z výpočtu podľa BP01, miesto vzniku rozdielu a protistrana podľa BP06, popis "HALIEROVÉ VYROVNANIE" |
 ```
 
 ---
 
-## Čo Ferimu neposielať
+## Čo v UC0416 zostáva otvorené
 
-Tieto otvorené body patria niekomu inému, aby si ich omylom nepridal:
+Po tejto odpovedi zostávajú štyri body:
 
 | Bod | Komu |
 |---|---|
-| Najmenší nominál verzus účtovná hodnota (UC0416) | Matúš |
-| Absolútna hodnota pri porovnaní limitu (UC0416) | Matúš |
-| Naplnenie polí debit_part a credit_part (UC0416) | Matej, prípadne Magda |
-| Konverzia BBAN na IBAN (UC0401) | Tomáš |
-| Hodnoty RequestAuditInfo (UC0401) | Tomáš |
-| Vzťah HIS0251 a TransStatusFlag (UC0401) | Tomáš |
-| Prechodné účty (UC0401) | Matúš |
-| Rozšírenie currency_rate o valutové kurzy (UC0403) | Vývoj |
-| Maximálna dĺžka popisu - už zodpovedané, 140 znakov | vyriešené |
-| Tabuľky BRANCH_JOURNAL (UC0403, UC0417) | Vývoj |
-| Poradie odosielania pokynov (UC0417) | Tomáš |
-| Uloženie statusu v databáze (UC0417) | Matúš a JJ |
-| Klasifikácia chýb z CBS (UC0417) | Tomáš |
-| Naplnenie polí pri nevzniknutom poplatku (UC0417) | Matúš |
-| Naviazané transakčné kódy (UC0417) | pani Tibenská |
-| Schopnosť vytvoriť JIRA ticket (UC0417) | Vývoj |
-| Retencia IT logov (UC0417) | Bezpečnosť alebo prevádzka |
+| Či funkcia vracia najmenší fyzický nominál alebo najnižšiu účtovnú hodnotu | Matúš |
+| Porovnanie limitu pri zápornom rozdiele, teda absolútna hodnota | Matúš |
+| Podľa čoho systém rozpozná miesto vzniku rozdielu | Feri alebo Matúš |
+| Naplnenie polí debit_part a credit_part | Matej, prípadne Magda |
+
+Prvé dva sú v otázkach, ktoré už máš pripravené pre Matúša. Tretí a štvrtý spolu súvisia - keď sa vyjasní, ako sa miesto vzniku rozpozná, bude ľahšie doplniť aj mapovanie polí.
+
+**Formulácia "podľa toho, kde to vznikne, tak tomu rozumiem ja"** naznačuje, že si tým Feri nie je úplne istý. Pri dotiahnutí mapovania polí s Matejom sa oplatí overiť aj toto, nech nestaviame na predpoklade.
+
