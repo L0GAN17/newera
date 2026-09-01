@@ -438,3 +438,5 @@ Ak to chceš dotiahnuť, stačí krátko:
 ```
 Ahoj Feri, este raz k tomu zapornemu halierovemu - odpovedal si mi ohladom potvrdenky a to mam zapracovane, dakujem. Ale isiel som este na to uctovanie: pri kladnom rozlisujeme ci sa uctuje voci klientskemu uctu alebo voci pokladni. Plati to iste rozlisenie aj pri zapornom, alebo ide zaporne vzdy voci klientskemu uctu?
 ```
+
+je to pri oboch, závisí, či debetujeme kreditujeme klientský účet alebo pokladňu - podľa toho kde to vznikne, tak tomu rozumiem ja, vždy je cieľom dorovnať účtovne transakciu po zaokrúhlení. Príklad, ktorý som Ti dal vtedy bolo, že kreditujeme klientov účet, lebo sme mu debetovali pri výbere o 0,02 CZK viac a teda sme potrebovali nadotovať klienta o 0,02 ako halierové vyrovnanie a vtedy ide účet halier. vyrovnanie - klient. Ak by klient vkladal a vznikne niečo také na strane pokladne robím kredit/debet pokladňa vs. účet halierové vyrovnanie
