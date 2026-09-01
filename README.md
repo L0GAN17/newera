@@ -439,4 +439,116 @@ Ak to chceš dotiahnuť, stačí krátko:
 Ahoj Feri, este raz k tomu zapornemu halierovemu - odpovedal si mi ohladom potvrdenky a to mam zapracovane, dakujem. Ale isiel som este na to uctovanie: pri kladnom rozlisujeme ci sa uctuje voci klientskemu uctu alebo voci pokladni. Plati to iste rozlisenie aj pri zapornom, alebo ide zaporne vzdy voci klientskemu uctu?
 ```
 
-je to pri oboch, závisí, či debetujeme kreditujeme klientský účet alebo pokladňu - podľa toho kde to vznikne, tak tomu rozumiem ja, vždy je cieľom dorovnať účtovne transakciu po zaokrúhlení. Príklad, ktorý som Ti dal vtedy bolo, že kreditujeme klientov účet, lebo sme mu debetovali pri výbere o 0,02 CZK viac a teda sme potrebovali nadotovať klienta o 0,02 ako halierové vyrovnanie a vtedy ide účet halier. vyrovnanie - klient. Ak by klient vkladal a vznikne niečo také na strane pokladne robím kredit/debet pokladňa vs. účet halierové vyrovnanie
+Prešiel som otvorené body naprieč UC. Ferimu patrí týchto trinásť. Zoradil som ich podľa toho, čo blokuje najviac.
+
+---
+
+## Blokuje dokončenie UC
+
+### UC0403 - Natypovanie transakcie (4 otázky)
+
+```
+Ahoj Feri, k UC0403 mi ostali styri veci:
+
+1. Stanovil si limity a nasobky pre EUR, CZK, GBP, HUF, CHF, PLN a USD. CashBox ale pracuje aj s dalsimi menami - AUD, CAD, DKK, JPY, NOK, RON, SEK a ZAR. NOK sam pouzivas v priklade, takze s nou pocitas. Potrebujem limit a nasobok aj pre tieto meny, alebo mi potvrd ze sa s nimi v CashBoxe nepracuje.
+
+2. Urcil si ze pri EUR a ucte v EUR su obe policka na 2 desatinne miesta. Ale co ked je hotovost v EUR a ucet je vedeny v cudzej mene? Tu kombinaciu sam uvadzas v tabulke kurzov ako "vklad EUR na ucet vedeny v CM", takze realne nastava, ale pravidlo pre nu nemam.
+
+3. Rozdiely v obrazovke podla typu transakcie si napisal ze su vo Figme. Vies mi poslat odkaz? Potrebujem ich do UC prepisat, aby to vyvojar aj tester vedeli precitat z jedneho dokumentu bez toho aby museli otvarat Figmu.
+
+4. Pri nespravnom formate zadanych udajov (zle symboly, suma co nie je nasobok, suma nad limit) nemam schvalenu hlasku v katalogu. Vies mi navrhnut textaciu a dat jej kod?
+```
+
+### UC0416 - Halierové vyrovnanie (1 otázka)
+
+```
+Ahoj Feri, k halierovemu vyrovnaniu mi ostala uz len jedna vec.
+
+Napisal si ze protistrana zavisi od toho ci rozdiel vznikol na strane uctu alebo na strane pokladne, a to chapem. Ale potrebujem vediet podla coho to ma system rozpoznat - podla akeho konkretneho udaja alebo priznaku sa rozhodne ze ide o jeden alebo o druhy pripad.
+
+Bez toho to vyvojar nevie naprogramovat a tester nevie vyvolat ani jeden z tych scenarov.
+```
+
+### UC0402 - Overenie klienta (3 otázky)
+
+```
+Ahoj Feri, k UC0402 mi ostali tri veci:
+
+1. Krajina vystavenia dokladu - GateGlobal to pole nema. Ma to teller vzdy vyplnat rucne z listboxu (mam tam ODS_SA.CCD_COUNTRY), alebo existuje nejaky iny zdroj?
+
+2. GateGlobal vracia priznaky ktore dnes nepouzivame - black list, blokovana obsluha klienta, umrtie klienta a evidovana exekucia. Mame ich v CashBoxe vyhodnocovat? Ak ano tak s akym dosledkom - blokuje to transakciu alebo len flagujeme?
+
+3. Ked GateGlobal vypadne tak uz nemame kam ist, lebo SubReg sa pre CashBox nepouziva. Cize transakcia jednoducho nemoze pokracovat, alebo moze teller vyplnit vsetky udaje o osobe rucne a ist dalej? Ak by mohol tak potrebujem vediet ako sa overi ci je klient a ci je whitelistovany, ked to nemame z coho zistit.
+```
+
+### UC0417 - Zaúčtovanie transakcie (3 otázky)
+
+```
+Ahoj Feri, k UC0417 mam tri veci:
+
+1. Este raz k tomu AT3, lebo si sa pytal co je tym myslene. Je to situacia ked CBS transakciu spravne zauctuje, klient uz ma peniaze aj potvrdenie a odide, ale zlyha zapis do nasej lokalnej databazy. Cize transakcia v banke presla, ale my o nej nemame zaznam v zurnale.
+
+Moj navrh je ze teller o tom nic nevidi - dostane normalnu hlasku o uspechu, lebo z jeho aj klientovho pohladu vsetko prebehlo spravne a aj tak s tym nemoze nic spravit. Riesi sa to JIRA ticketom na pozadi a zapis sa doplni dodatocne. Suhlasis, alebo by mal teller vediet ze sa nieco stalo?
+
+2. Ked sa dodatocne zisti ze transakcia skoncila chybou a klient uz davno odisiel s potvrdenim - moj navrh je ze system to automaticky neriesi, len vytvori incident a doriesenie je na prevadzke, lebo ci sa ma douctovat alebo stornovat je uctovne rozhodnutie. Sedi to?
+
+3. Opakovane spracovanie nespracovanych transakcii - napisal si ze to ma byt sucastou UC0417 alebo samostatneho UC na spracovanie otvorenych txn. Vies rozhodnut ktore z toho? A este interval - napisal si ze minimalne pri zatvoreni pokladne a idealne aj pocas dna. Ja som navrhol 15 minut a max 10 pokusov, ale su to cisla co som si vymyslel. Mas s tym skusenost?
+```
+
+### UC0401 - Overenie čísla účtu (1 otázka)
+
+```
+Ahoj Feri, k UC0401 mi treba schvalit jednu hlasku.
+
+Ked je cislo uctu tvarovo spravne ale ucet v CBS neexistuje, navrhujem vlastnu hlasku "Zadane cislo uctu neexistuje" namiesto E027 co je pre zly tvar. Teller tak vie ci ma preklep alebo ucet naozaj neexistuje.
+
+V katalogu taka hlaska nie je, navrhujem kod W014. Vies to schvalit a doplnit do katalogu?
+```
+
+---
+
+## Neblokujúce, ale otvorené
+
+```
+Ahoj Feri, este par mensich veci ked budes mat cas:
+
+1. UC0402 - v UC701 sa pri rozmieňani v mene firmy odvolavam na sekciu Iny subjekt a vo Figme je ta sekcia priamo v modali Overenie osoby. Ale z UC0402 sme ju vyhodili, takze dnes to nie je popisane nikde. Kde sa to ma riesit? V UC701 mam len zmienku ze sa vyplna, ale nie odkial sa udaje o firme beru.
+
+2. UC0402 - v zozname UC je UC0407 Overenie klienta manualne pre nedostupny GATE. To co mam v UC0402 ako alternativny tok (priamy vstup bez prekliku) je vlastne to iste. Ktore z toho plati?
+
+3. UC0402 - potrebujem vediet cim teller uzavrie overenie osoby. Vo Figme pri rozmieňani ma ten modal tlacidla Zrusit a Potvrdit. Plati to iste aj pre UC0402? Ma byt Potvrdit neaktivne kym nie su vyplnene povinne polia, ako to mame v UC0403? A co sa stane ked da Zrusit?
+
+4. UC0403 - povinny konstantny symbol si napisal ze s nim zatial nepocitame. Chcem sa uistit ze to mozem do UC napisat natvrdo, teda ze pole je vzdy nepovinne.
+
+5. UC0417 - pri hromadnom vklade si napisal ze suhrnna hlaska dnes nie je ale mozeme ju vymysliet. Ma ju CashBox mat, alebo to nechame tak ako je?
+
+6. UC0417 - SLA pre riesenie incidentu si napisal ze musia byt extremne prisne ale asi sa to este nenastavovalo. Vies mi dat konkretne hodnoty, alebo to mam nechat na prevadzku?
+
+7. UC0417 - ked sa nepodari vytvorit JIRA ticket, mam tam ze sa to zapise do logu a zurnalu. Ma system navyse niekoho aktivne notifikovat?
+```
+
+---
+
+## Čo Ferimu neposielať
+
+Tieto otvorené body patria niekomu inému, aby si ich omylom nepridal:
+
+| Bod | Komu |
+|---|---|
+| Najmenší nominál verzus účtovná hodnota (UC0416) | Matúš |
+| Absolútna hodnota pri porovnaní limitu (UC0416) | Matúš |
+| Naplnenie polí debit_part a credit_part (UC0416) | Matej, prípadne Magda |
+| Konverzia BBAN na IBAN (UC0401) | Tomáš |
+| Hodnoty RequestAuditInfo (UC0401) | Tomáš |
+| Vzťah HIS0251 a TransStatusFlag (UC0401) | Tomáš |
+| Prechodné účty (UC0401) | Matúš |
+| Rozšírenie currency_rate o valutové kurzy (UC0403) | Vývoj |
+| Maximálna dĺžka popisu - už zodpovedané, 140 znakov | vyriešené |
+| Tabuľky BRANCH_JOURNAL (UC0403, UC0417) | Vývoj |
+| Poradie odosielania pokynov (UC0417) | Tomáš |
+| Uloženie statusu v databáze (UC0417) | Matúš a JJ |
+| Klasifikácia chýb z CBS (UC0417) | Tomáš |
+| Naplnenie polí pri nevzniknutom poplatku (UC0417) | Matúš |
+| Naviazané transakčné kódy (UC0417) | pani Tibenská |
+| Schopnosť vytvoriť JIRA ticket (UC0417) | Vývoj |
+| Retencia IT logov (UC0417) | Bezpečnosť alebo prevádzka |
