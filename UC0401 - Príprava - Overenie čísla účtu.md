@@ -16,11 +16,13 @@ Overenie existencie čísla účtu v CBS. Cieľom je zistiť, či zadané čísl
 Ak účet existuje, systém si z response rovno potiahne časti API, ktoré potrebujú nadväzujúce UC (aby sa dopyt nerobil duplicitne).
 
 
-**Aktéri**
-Pripomienka od vývojara: definovať čo robí každá rola
-- Teller
-- Supervízor-Teller
-- System
+### Aktéri
+
+| Aktér | Čo v tomto UC robí |
+|---|---|
+| **Teller** | Zadáva číslo účtu vo formáte BBAN. Je to jediná vstupná akcia v tomto UC. Pri chybe zostáva na obrazovke zadania, môže číslo opraviť a zadať znova, alebo z transakcie vystúpiť |
+| **Supervízor-Teller** | V UC0401 nevykonáva žiadnu akciu. Uvedený je preto, že transakciu môže realizovať aj používateľ s rolou Supervízor-Teller, ktorý v tom prípade vystupuje v úlohe tellera. Žiadne schvaľovanie ani override sa v UC0401 nevyžaduje |
+| **Systém** | Vykonáva všetky ostatné kroky. Lokálne validuje formát čísla účtu a MOD11, prevádza BBAN na IBAN, overuje dostupnosť CBS, volá rozhranie AccountEnquiryEnterprise, vyhodnocuje odpoveď, ukladá dáta pre nadväzujúce UC a zobrazuje hlášky |
 
 ## Vstupné podmienky
 
