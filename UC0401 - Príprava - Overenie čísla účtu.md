@@ -17,7 +17,7 @@ Ak účet existuje, systém si z response rovno potiahne časti API, ktoré potr
 
 
 **Aktéri**
-
+Pripomienka od vývojara: definovať čo robí každá rola
 - Teller
 - Supervízor-Teller
 - System
@@ -50,6 +50,63 @@ Ak účet existuje, systém si z response rovno potiahne časti API, ktoré potr
     - Ak odpoveď neobsahuje chybu, účet v CBS existuje a UC pokračuje nasledujúcim krokom
     - Ak odpoveď obsahuje chybu s kódom HIS0251, účet v CBS neexistuje a tok pokračuje **AT3**
 7. Systém uloží do kontextu transakcie kompletnú odpoveď rozhrania vrátane všetkých vrátených údajov o účte (zoznam polí viď sekcia API). Uložené dáta sú k dispozícii nadväzujúcim UC bez opakovaného volania CBS
+   -Pripomienka k bodu 7.: Vývojar: v ktorej Cashbox tabulke/ach su ulozene hodnoty?
+   Vývojar ešte spomenul:
+Vidím, že v UC je spomenuté "Do databázy sa nezapisuje nič" v sekcii Výstupné podmienky.
+ Aale do kontextu tranzakcie by som chapal ze proste ten flow si drzi tie udaje a dalej ich pouziva 
+Ale mame pri vkladoch aj vyberoch taku tabulku vymyslenu ktora sa nazyva ze deposit 
+ 
+a tam sa ukladaju priebezne veci z toho vkladu, napriklad ziskas udaje o klientovy ulozia sa tam, nastavy sumu ktoru chce vybrat ulozi sa tam, nastavi sa kurz ktory sa tam tiez ulozi atd aby to nebolo len take ze na konci vkladu sa na BE posiela obrovsky request a tiez aby to bolo viac safe. Mozem ti poslat tu tabulku ako vyzera
+ 
+deposit
+  id: uuid
+  status: varchar(20)
+  bban: bigint
+  deposit_currency: char(3)
+  account_currency: char(3)
+  deposit_currency_rate: numeric(20,10)
+  overridden_rate: numeric(20,10)
+  deposit_eur_rate: numeric(20,10)
+  amount: numeric(20,2)
+  fee_for_deposit_info: jsonb
+  coin_handling_fee_info: jsonb
+  fee_policy: varchar(20)
+  white_list_flag: boolean
+  performed_by: varchar(50)
+  created_at: timestamp
+  submitted_at: timestamp
+  transaction_sequence_number: integer
+  payment_details: jsonb
+  denominations_in: jsonb
+  denominations_out: jsonb
+  fee_coins_in: jsonb
+  fee_coins_out: jsonb
+  depositor_info: jsonb
+  account_info: jsonb
+
+a vyzera to v tom cca takto 
+ 
+status              bban        deposit_currency  account_currency  deposit_currency_rate  overridden_rate  deposit_eur_rate  amount
+CANCELLED           2820002844  USD               USD               <null>                 <null>           1.1834000000      nezobrazené
+SUBMITTED           2820002844  USD               USD               <null>                 <null>           1.1834000000      nezobrazené
+DRAFT               <null>      <null>            <null>            <null>                 <null>           <null>            nezobrazené
+DRAFT               <null>      <null>            <null>            <null>                 <null>           <null>            nezobrazené
+SUBMITTED           2627074299  EUR               EUR               <null>                 <null>           <null>            nezobrazené
+DENOMINATIONS_SET   2627074299  EUR               EUR               <null>                 <null>           <null>            nezobrazené
+DENOMINATIONS_SET   2627074299  EUR               EUR               <null>                 <null>           <null>            nezobrazené
+DRAFT               <null>      <null>            <null>            <null>                 <null>           <null>            nezobrazené
+DRAFT               <null>      <null>            <null>            <null>                 <null>           <null>            nezobrazené
+DRAFT               <null>      <null>            <null>            <null>                 <null>           <null>            nezobrazené
+DENOMINATIONS_SET   2627074299  EUR               EUR               <null>                 <null>           <null>            nezobrazené
+
+ 
+ale ta tabulka je skor taka pomocna k tomu ako sme to vymysleli ze to robime na BE, v podstate nieco ako cache pre ten vklad aby sme v priebehu celeho vkladu mali zaznamenane tie udaje ktore sa tam postupne vyplnaju a dotahuju
+ 
+cize lujza to bude vediet najst ale teoreticky sa tam hovori ze si to ulozi do kontextu a to by mohlo byt aj nieco take ze si to appka len docasne pamata a neuklada sa to nikde
+ 
+Treba spomenut na analytickom meetingu.
+
+   
 8. Systém ukončí UC s úspechom a odovzdá uložené údaje nadväzujúcim UC
 
 ## Alternatívny tok
