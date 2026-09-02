@@ -117,7 +117,7 @@ Podmienka: Kontrola A (existencia dodávateľa podľa IČO alebo DIČ voči expo
 6. Keď spracovateľ nadobudne všetky potrebné informácie na spracovanie faktúry, faktúru buď spracuje, alebo ju stornuje (status 7 s povinnou poznámkou).
 
 - Tok pokračuje krokom 1.
-- (OTVORENY BOD: či sa požiadavka zadáva do iProc alebo do UPI - viď otázka 17)
+- (OTVORENY BOD: či sa požiadavka zadáva do iProc alebo do UPI - viď otázka 17) Odpoved: požiadavka na založenie nového dodávateľa a nového čísla účtu sa zadáva do Iproc
 
 **AT 1b - Bankové spojenie neexistuje alebo nie je schválené (kontrola B)**
 
@@ -153,7 +153,7 @@ Podmienka: Kontrola A dodávateľa nájde, ale spracovateľ pri porovnaní s obr
 5. Systém zaloguje zmenu dodávateľa s pôvodnou a novou hodnotou a s TB spracovateľa.
 
 - Tok pokračuje krokom 8.
-- (OTVORENY BOD: podľa akých údajov sa dodávateľ vyhľadáva, v ktorých statusoch je funkcia dostupná a či systém sám ponúka kandidátov - viď otázky 18 až 20)
+- (OTVORENY BOD: podľa akých údajov sa dodávateľ vyhľadáva, v ktorých statusoch je funkcia dostupná a či systém sám ponúka kandidátov - viď otázky 18 až 20) Odpoved: spracovateľ vyhľadáva dodávateľa najčastejšie podľa názvu dodávateľa alebo podľa IČA dodávateľa napr. ak začnem písať  OMV (prípadne číslo iča: 123… ) tak mi ponúkne všetkých dodávateľov s týmto názvom (ičom) kde su viditeľné údaje s ktorými su založený v ODS a spracovateľ si následnej vyberie vhodného dodávateľa. Toto by malo byť dostupné vo všetkých statusoch kde je faktúra editovateľná.
 
 **AT 2a - Uloženie obrazu faktúry pre požiadavku na založenie kmeňových dát**
 
@@ -373,7 +373,7 @@ Obsahuje akciu na otvorenie obrazovky Úprava faktúry a akcie na zmenu statusu 
 | Pri opustení obrazovky bez zvolenia akcie systém vyzve spracovateľa, či si želá zmeny uložiť alebo zrušiť - iba ak reálne niečo zmenil |
 | Akcia Zrušiť vráti spracovateľa na detail faktúry bez uloženia; žiadna zmena sa nezaloguje |
 
-#### Obrazovka 3: Obraz faktúry
+#### Obrazovka 3: Obraz faktúry Odpoved/Popis potrebný zapracovat do UC: Tento obraz faktúry potrebujeme v statuse 2 ( nový dodávateľ) a 3 ( nové číslo účtu) vedieť uložiť, najlepšie vo formáte pdf (prípadne v inom čitateľnom formáte) nakoľko tento obraz je potrebné vložiť k požiadavke do Iprocu na založenie dodávateľa alebo čisla účtu. 
 
 Popis: Obraz faktúry sa automaticky otvára pri vstupe do detailu a je zobrazený aj na obrazovke Úprava faktúry. Je needitovaný a zobrazuje faktúru presne v podobe, v akej prišla od dodávateľa. Zmeny vykonané počas spracovania sa doň nepremietajú. Usporiadanie polí vychádza z poradia, v akom sú uvedené v XML. Obraz musí byť možné otvoriť aj z aplikácie iProc cez DMS linku na preklik.
 
@@ -425,5 +425,5 @@ Polia
     - **iProc:** odoslanie dát faktúry na existujúce API iProc; spätné potvrdenie s interným číslom dokladu a číslom dodávateľa; rozlíšenie chyby iProc vs eInvoice. Chybové hlásenie prichádza v poli Processing Notes; pôvod chyby sa rozlišuje podľa prefixu (`iProc - TBwsProc:` = ORACLE, `iProc - TBwsProc FC:` = ABBYY). Známe kódy: E037 duplicita, E046 neplatné číslo objednávky. (OTVORENY BOD: úplná špecifikácia API, zoznam chybových kódov, technický spôsob spätného prenosu)
     - **ODS:** export dodávateľov (názov, bankové spojenie, IČO, IČ DPH, adresa) ako referenčné dáta kontrol. V ODS sú iba údaje dodávateľa - kontrola A1 nad IČ DPH odberateľa preto voči ODS neprebieha. Systém je nastavený tak, že dodávateľ a číslo účtu budú v ODS najskôr nasledujúci deň po prijatí faktúry. Rozhranie musí umožniť aj vyhľadanie dodávateľa spracovateľom pri oprave nesprávnej identifikácie (AT 1d). (OTVORENY BOD: technický spôsob a frekvencia)
     - **Obraz faktúry:** dodávateľské faktúry prídu do eInvoice výhradne v XML. Polia sa v obraze usporiadajú podľa poradia, v akom sú uvedené v XML; mapovanie atribútov sa nevykonáva. Polymorfné XML atribúty vyriešia architekt a vývoj. Obraz musí byť generovateľný ako súbor na stiahnutie (viď otázka 12) a dostupný na preklik z iProc (viď otázka 23).
-    - **FileNet DMS:** prílohy faktúry. (OTVORENY BOD: dostupnosť príloh na detaile; súvisí aj s otázkou 23)
+    - **FileNet DMS:** prílohy faktúry. (OTVORENY BOD: dostupnosť príloh na detaile; súvisí aj s otázkou 23) Odpoved ktoru treba do UC zapracovat: prílohy k fakúre by sa mali preklápať spolu s obrazom faktúry do Iproc. A mali by sa dať stiahnuť a uložiť na interné úložisko.
     - **Digitálny poštár:** zdroj došlej faktúry (XML uložené tak, ako prišlo)
