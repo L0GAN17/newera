@@ -1,4 +1,4 @@
-Prešiel som dokument. Zapracoval som 11 odpovedí, z toho 6 uzatvára otvorené otázky, a jednu úplne novú požiadavku k prílohám.
+Nižšie je celý UC-202 s opravami. Kontrolu konzistencie som spravil na konci - vypisujem, čo som overoval.
 
 ---
 
@@ -26,20 +26,24 @@ Prešiel som dokument. Zapracoval som 11 odpovedí, z toho 6 uzatvára otvorené
 
 **Uzavreté otvorené otázky**
 
-1. **Vyhľadávanie dodávateľa** prebieha najčastejšie podľa názvu alebo IČO. Po zadaní časti hodnoty systém ponúkne všetkých zodpovedajúcich dodávateľov spolu s údajmi, s ktorými sú založení v ODS, a spracovateľ si vyberie vhodného.
-2. **Oprava dodávateľa je dostupná vo všetkých statusoch**, v ktorých je faktúra editovateľná.
-3. **Požiadavka na založenie dodávateľa aj čísla účtu sa zadáva do iProc**, nie do UPI. Rozpor uzavretý.
+1. **Vyhľadávanie dodávateľa** prebieha podľa názvu alebo IČO. Po zadaní časti hodnoty systém ponúkne všetkých zodpovedajúcich dodávateľov spolu s údajmi, s ktorými sú založení v ODS, a spracovateľ si vyberie vhodného.
+2. **Dohľadanie dodávateľa je dostupné vo všetkých statusoch**, v ktorých je faktúra editovateľná.
+3. **Požiadavka na založenie dodávateľa aj čísla účtu sa zadáva do iProc**, nie do UPI.
 4. **Uloženie obrazu faktúry** je povinné v statusoch 2 a 3. V ostatných statusoch nie je nutnosťou, ale ak sa to technicky dá, biznis to uvíta.
-5. **Formát obrazu faktúry** - preferuje sa generovanie PDF. Náhradný formát biznis neurčil.
-6. Potvrdené, že obraz faktúry sa v statusoch 2 a 3 ukladá pre priloženie k požiadavke do iProc.
+5. **Formát obrazu faktúry** - preferuje sa generovanie PDF.
+6. **Prílohy faktúry** sa preklápajú do iProc spolu s obrazom faktúry a musí byť možné ich stiahnuť na interné úložisko.
 
-**Nová požiadavka**
+**Opravy z revízie zapracovania**
 
-7. **Prílohy faktúry sa majú preklápať spolu s obrazom faktúry do iProc** a zároveň musí byť možné ich stiahnuť a uložiť na interné úložisko. Doplnené do biznis zadania, do alternatívneho toku a do sekcie API.
+7. **AT 1d rozšírený na dve situácie.** Doteraz riešil len opravu nesprávne priradeného dodávateľa. Doplnená situácia, keď kontrola A dodávateľa nenašla vôbec a spracovateľ ho dohľadá manuálne - to je podľa stavového modelu jediná cesta, ako faktúru odblokovať zo statusu 2 bez čakania na automatické overenie ODS.
+8. **AT 1a doplnené o odkaz na manuálne dohľadanie dodávateľa.** Doteraz uvádzalo len automatické overovanie a zadanie requestu.
+9. **Editovateľnosť poľa Obchodný partner spresnená** vrátane statusov 2 a 3; doplnená otázka na potvrdenie.
+10. **Odstránená nesprávna podmienka dostupnosti akcií na detaile.** Doteraz bolo uvedené, že akcie sú dostupné, „ak faktúra nevyžaduje úpravy" - to systém nevie posúdiť. Dostupnosť riadi stavový model, posúdenie potreby úprav je na spracovateľovi.
+11. **Doplnené odloženie do AT 6a** - biznis spomenul aj dozistenie, čo zodpovedá statusu 5.
 
 **Zúžená otázka**
 
-8. Otázka, či systém pri malom nesúlade sám ponúkne kandidátov na dodávateľa spôsobom, akým to robí ABBYY, zostáva otvorená. Vyhľadávanie na základe zadanej hodnoty je potvrdené, proaktívne ponúknutie bez zásahu spracovateľa nie.
+12. Otázka, či systém pri malom nesúlade sám ponúkne kandidátov spôsobom, akým to robí ABBYY, zostáva otvorená. Vyhľadávanie na základe zadanej hodnoty je potvrdené, proaktívne ponúknutie bez zásahu spracovateľa nie.
 
 ## Otázky
 
@@ -58,13 +62,14 @@ Prešiel som dokument. Zapracoval som 11 odpovedí, z toho 6 uzatvára otvorené
 | 11 | Spôsob a frekvencia načítania exportu dodávateľov z ODS. Rozhranie musí umožniť aj vyhľadávanie dodávateľa podľa časti názvu alebo IČO s vrátením údajov, s ktorými je dodávateľ založený v ODS. | Architekt, vývoj |
 | 12 | Akým spôsobom sa technicky vygeneruje PDF s obrazom faktúry, ktoré si spracovateľ stiahne? Biznis preferuje PDF; náhradný formát neurčil. | Architekt |
 | 13 | Ako sa technicky realizuje preklopenie príloh do iProc a ich stiahnutie na interné úložisko? Súvisí s FileNet DMS. | Architekt |
-| 14 | **Nová:** Čo je obsahom príloh, keď dodávateľské faktúry prídu do eInvoice výhradne v XML? Ide o dokumenty vložené priamo v XML, alebo o samostatné súbory od poštára? | Biznis, architekt |
-| 15 | **Nová:** Preklápajú sa prílohy do iProc automaticky spolu s odoslaním faktúry, alebo ich prikladá spracovateľ manuálne? | Biznis |
+| 14 | Čo je obsahom príloh, keď dodávateľské faktúry prídu do eInvoice výhradne v XML? Ide o dokumenty vložené priamo v XML, alebo o samostatné súbory od poštára? | Biznis, architekt |
+| 15 | Preklápajú sa prílohy do iProc automaticky spolu s odoslaním faktúry, alebo ich prikladá spracovateľ manuálne? | Biznis |
 | 16 | Má systém pri malom nesúlade sám ponúknuť zoznam kandidátov na dodávateľa bez zásahu spracovateľa, ako to robí ABBYY? Vyhľadávanie na základe zadanej hodnoty je potvrdené. | Biznis |
 | 17 | Ktorý atribút XML nesie IČ DPH odberateľa, ktoré sa v kontrole A1 porovnáva s hodnotou SK7020000944? | Architekt |
-| 18 | Jazyk názvov polí (EN vs SK). | Biznis, UX |
-| 19 | Role a oprávnenia (kto smie editovať, holdovať, rušiť, púšťať do iProc). | Biznis |
-| 20 | Smeruje preklik z iProc na obraz faktúry priamo do eInvoice, alebo cez DMS? Ak cez DMS, čo sa tam ukladá a kto to tam ukladá? Ak priamo do eInvoice, ako sa zachová kompatibilita s existujúcimi linkami do DMS? | Architekt |
+| 18 | **Nová:** Je pole Obchodný partner editovateľné aj v statusoch 2 a 3? V UC sú tam dnes editovateľné iba Poznámka spracovateľa, Číslo bankového účtu a Spôsob úhrady. Podľa odpovede biznisu má byť dohľadanie dodávateľa dostupné vo všetkých statusoch, kde je faktúra editovateľná - to by znamenalo doplniť Obchodného partnera medzi editovateľné polia pre statusy 2 a 3. | Biznis |
+| 19 | Jazyk názvov polí (EN vs SK). | Biznis, UX |
+| 20 | Role a oprávnenia (kto smie editovať, holdovať, rušiť, púšťať do iProc). | Biznis |
+| 21 | Smeruje preklik z iProc na obraz faktúry priamo do eInvoice, alebo cez DMS? Ak cez DMS, čo sa tam ukladá a kto to tam ukladá? Ak priamo do eInvoice, ako sa zachová kompatibilita s existujúcimi linkami do DMS? | Architekt |
 
 ## Biznis zadanie
 
@@ -76,7 +81,7 @@ Spracovateľ (Prevádzková účtáreň) v prvej fáze skontroluje každú došl
 - V detaile musia byť viditeľné všetky položky vizualizované v stĺpcoch zoznamu faktúr + Remittance information / Invoice note
 - Farebná vizualizácia podľa xls platí aj pre detail (napr. červená bunka pri prázdnom Č. pôvodnej faktúry pre typy 381/383)
 - História zmien sa zobrazuje priamo v detaile pod výsledkami automatizovaných kontrol (UC-203)
-- Ak faktúra nevyžaduje žiadne úpravy, spracovateľ ju vie odoslať, odložiť alebo stornovať priamo z detailu, bez otvorenia obrazovky Úprava faktúry
+- **Akcie na zmenu stavu sú dostupné aj na obrazovke detailu.** Ak spracovateľ posúdi, že faktúra nevyžaduje úpravy, vie ju odoslať, odložiť alebo stornovať priamo z detailu bez otvorenia obrazovky Úprava faktúry
 
 **Úprava faktúry**
 
@@ -84,16 +89,16 @@ Spracovateľ (Prevádzková účtáreň) v prvej fáze skontroluje každú došl
 - Na obrazovke Úprava faktúry musí spracovateľ vidieť obraz faktúry a údaje súčasne. Podľa obrazu dopĺňa údaje, ktoré vyťažené dáta neobsahujú alebo ktoré je potrebné overiť - napríklad spôsob úhrady (hotovosť, kreditná karta, vyúčtovacia faktúra) a popis
 - Pri prechode tabulátorom po editovateľných poliach sa v obraze faktúry podsvieti zdroj údaja nažlto
 - Ak spracovateľ opustí obrazovku Úprava faktúry a reálne niečo zmenil, systém ho vyzve, či si želá zmeny uložiť alebo zrušiť
-- **Spracovateľ musí vedieť dohľadať a vybrať správneho dodávateľa** vo všetkých statusoch, v ktorých je faktúra editovateľná
+- **Spracovateľ musí vedieť dohľadať a vybrať dodávateľa** vo všetkých statusoch, v ktorých je faktúra editovateľná. Platí to pre priradenie dodávateľa, ktorého kontrola A nenašla, aj pre opravu nesprávne priradeného dodávateľa
 
 **Obraz faktúry**
 
 - Obraz faktúry je needitovaný a zobrazuje faktúru presne v podobe, v akej prišla od dodávateľa. Zostáva nemenný rovnako ako došlé XML, aj keď spracovateľ niektoré polia počas spracovania mení
 - Obraz faktúry musí obsahovať všetky dáta, ktoré dodávateľ poslal
 - Vykonané zmeny sa nepremietajú do obrazu faktúry; sú viditeľné v histórii zmien
-- **V statusoch 2 a 3 musí byť možné obraz faktúry uložiť ako súbor**, preferovane vo formáte PDF. Spracovateľ ho stiahne na úložisko a priloží k požiadavke do iProc na založenie dodávateľa (status 2) alebo čísla bankového účtu (status 3). V ostatných statusoch uloženie obrazu nie je nutnosťou, ale ak to technicky pôjde, biznis to uvíta
+- V statusoch 2 a 3 musí byť možné obraz faktúry uložiť ako súbor, preferovane vo formáte PDF. Spracovateľ ho stiahne na úložisko a priloží k požiadavke do iProc na založenie dodávateľa (status 2) alebo čísla bankového účtu (status 3). V ostatných statusoch uloženie obrazu nie je nutnosťou, ale ak to technicky pôjde, biznis to uvíta
 - Automatické priloženie obrazu priamo do iProc je vedené ako rozvoj do budúcna
-- Obraz faktúry musí byť dostupný na preklik z aplikácie iProc. Spôsob prepojenia je otvorený - viď otázka 20
+- Obraz faktúry musí byť dostupný na preklik z aplikácie iProc. Spôsob prepojenia je otvorený - viď otázka 21
 
 **Prílohy faktúry**
 
@@ -106,7 +111,7 @@ Popis stavov tu: Stavový model došlej faktúry
 
 ## Aktéri
 
-- Hlavný aktér: Používateľ eInvoice (presné role OTVORENY BOD)
+- Hlavný aktér: Používateľ eInvoice (presné role OTVORENY BOD - viď otázka 20)
 - Systém: eInvoice
 
 ## Spúšťač
@@ -167,9 +172,10 @@ Podmienka: Kontrola A (existencia dodávateľa podľa IČO alebo DIČ voči expo
 1. Systém ponechá faktúru v statuse 2. dodávateľ nezaevidovaný.
 2. Spracovateľ po nakliknutí do detailu pri uložení povinne vloží Poznámku spracovateľa s informáciou o spôsobe riešenia (zadanie requestu do iProc na založenie kmeňových dát).
 3. Spracovateľ uloží obraz faktúry ako súbor a priloží ho k požiadavke do iProc (viď AT 2a).
-4. Systém automaticky overuje zadanie dodávateľa v ODS o 6:00 a 12:00. Po zaevidovaní dodávateľa aj čísla účtu vykoná kontrolu C duplicita a podľa výsledku pridelí faktúre status 4. duplicita alebo 1. na spracovanie.
-5. Systém je nastavený tak, že dodávateľ a číslo účtu budú v ODS najskôr nasledujúci deň po prijatí faktúry. Faktúru preto nie je možné odblokovať v ten istý deň, v ktorom bol request na založenie zadaný.
-6. Keď spracovateľ nadobudne všetky potrebné informácie na spracovanie faktúry, faktúru buď spracuje, alebo ju stornuje (status 7 s povinnou poznámkou).
+4. **Spracovateľ môže alternatívne dodávateľa dohľadať a priradiť manuálne podľa AT 1d.** Ak sa dodávateľ v ODS nachádza a kontrola B prebehne validne, faktúra sa preradí do statusu 1 bez čakania na automatické overenie.
+5. Systém automaticky overuje zadanie dodávateľa v ODS o 6:00 a 12:00. Po zaevidovaní dodávateľa aj čísla účtu vykoná kontrolu C duplicita a podľa výsledku pridelí faktúre status 4. duplicita alebo 1. na spracovanie.
+6. Systém je nastavený tak, že dodávateľ a číslo účtu budú v ODS najskôr nasledujúci deň po prijatí faktúry. Faktúru preto nie je možné odblokovať automatickým overením v ten istý deň, v ktorom bol request na založenie zadaný.
+7. Keď spracovateľ nadobudne všetky potrebné informácie na spracovanie faktúry, faktúru buď spracuje, alebo ju stornuje (status 7 s povinnou poznámkou).
 
 - Tok pokračuje krokom 1.
 - Poznámka: požiadavka na založenie nového dodávateľa aj nového čísla účtu sa zadáva do iProc.
@@ -197,19 +203,22 @@ Podmienka: Kontrola C zistí duplicitu (DIČ + číslo faktúry + dátum vystave
 
 - Tok pokračuje krokom 10 (bod 4), resp. UC končí v statuse 7 (bod 3).
 
-**AT 1d - Nesprávne identifikovaný dodávateľ**
+**AT 1d - Dohľadanie a výber dodávateľa**
 
-Podmienka: Kontrola A dodávateľa nájde, ale spracovateľ pri porovnaní s obrazom faktúry zistí, že systém priradil nesprávneho dodávateľa.
+Podmienka: Spracovateľ potrebuje priradiť alebo zmeniť dodávateľa faktúry. Nastáva v dvoch situáciách:
+
+- kontrola A dodávateľa nenašla a faktúra je v statuse 2. dodávateľ nezaevidovaný, alebo
+- kontrola A dodávateľa našla, ale spracovateľ pri porovnaní s obrazom faktúry zistí, že je nesprávny.
 
 1. Spracovateľ začne zadávať názov dodávateľa alebo jeho IČO do vyhľadávacieho poľa (napríklad OMV, alebo začiatok IČO 123).
 2. Systém priebežne ponúka všetkých dodávateľov z ODS, ktorí zadanej hodnote zodpovedajú, spolu s údajmi, s ktorými sú v ODS založení, aby ich spracovateľ vedel odlíšiť.
 3. Spracovateľ vyberie vhodného dodávateľa z ponuky.
 4. Systém prevezme od vybraného dodávateľa Číslo dodávateľa iProc (Oracle vendor ID) a Číslo dodávateľa SAP.
-5. Systém vyhodnotí kontrolu B aj kontrolu C: kontrolu B nad bankovým účtom faktúry voči kmeňovým dátam nového dodávateľa a kontrolu C duplicita nad novým kľúčom. Ak je kontrola B negatívna, faktúra sa preradí do statusu 3. BU neexistuje. Ak kontrola C zistí duplicitu, faktúra sa preradí do statusu 4. duplicita. Ak sú obe kontroly validné, faktúra pokračuje v spracovaní.
+5. Systém vyhodnotí kontrolu B aj kontrolu C: kontrolu B nad bankovým účtom faktúry voči kmeňovým dátam vybraného dodávateľa a kontrolu C duplicita nad novým kľúčom. Ak je kontrola B negatívna, faktúra sa preradí do statusu 3. BU neexistuje. Ak kontrola C zistí duplicitu, faktúra sa preradí do statusu 4. duplicita. Ak sú obe kontroly validné, faktúra sa preradí do statusu 1. na spracovanie, prípadne v ňom zostáva.
 6. Systém zaloguje zmenu dodávateľa s pôvodnou a novou hodnotou a s TB spracovateľa.
 
 - Tok pokračuje krokom 8.
-- Funkcia je dostupná vo všetkých statusoch, v ktorých je faktúra editovateľná.
+- Funkcia je dostupná vo všetkých statusoch, v ktorých je faktúra editovateľná. (OTVORENY BOD: editovateľnosť poľa Obchodný partner v statusoch 2 a 3 - viď otázka 18)
 - (OTVORENY BOD: či systém pri malom nesúlade sám ponúkne kandidátov bez zadania hodnoty spracovateľom - viď otázka 16)
 
 **AT 2a - Uloženie obrazu faktúry pre požiadavku do iProc**
@@ -235,15 +244,17 @@ Podmienka: Spracovateľ potrebuje prílohy faktúry mimo aplikácie.
 - Tok pokračuje krokom 2.
 - (OTVORENY BOD: čo je obsahom príloh a v akej podobe prichádzajú - viď otázka 14)
 
-**AT 6a - Faktúra nevyžaduje úpravy**
+**AT 6a - Spracovanie bez úpravy údajov**
 
-Podmienka: Spracovateľ pri kontrole detailu zistí, že faktúra nevyžaduje žiadne úpravy editovateľných polí.
+Podmienka: Spracovateľ posúdi, že faktúra nevyžaduje žiadne úpravy editovateľných polí.
 
-1. Spracovateľ nezobrazí obrazovku Úprava faktúry.
+1. Spracovateľ neotvorí obrazovku Úprava faktúry.
 2. Spracovateľ zvolí akciu Na odoslanie, Odložiť alebo Stornovať priamo na obrazovke detailu.
 3. Systém vykoná zmenu stavu; pri statusoch vyžadujúcich poznámku ju povinne vyžiada.
+4. Systém vráti spracovateľa do zoznamu faktúr v danej záložke (UC-201).
 
-- Tok pokračuje krokom 10, resp. UC končí podľa zvolenej akcie.
+- Tok pokračuje krokom 10 pri odoslaní, resp. UC končí pri odložení alebo stornovaní.
+- Dostupnosť akcií riadi stavový model, nie posúdenie potreby úprav - to je na spracovateľovi.
 
 **AT 8a - Spôsob úhrady 2 až 5**
 
@@ -303,9 +314,9 @@ Podmienka: Spracovateľ nechce vykonané zmeny uložiť.
 
 **AT 9c - Opustenie obrazovky Úprava faktúry bez potvrdenia**
 
-Podmienka: Spracovateľ opúšťa obrazovku Úprava faktúry bez toho, aby zvolil Uložiť alebo Zrušiť, a v poliach reálne vykonal zmenu.
+Podmienka: Spracovateľ opúšťa obrazovku Úprava faktúry bez toho, aby zvolil Uložiť alebo Zrušiť.
 
-1. Systém zobrazí výzvu, či si spracovateľ želá zmeny uložiť alebo zrušiť.
+1. Ak spracovateľ v poliach reálne vykonal zmenu, systém zobrazí výzvu, či si želá zmeny uložiť alebo zrušiť.
 2. Ak spracovateľ zvolí uloženie, systém pokračuje podľa AT 9a.
 3. Ak spracovateľ zvolí zrušenie, systém pokračuje podľa AT 9b.
 4. Ak spracovateľ na obrazovke nič nezmenil, výzva sa nezobrazí a systém sa vráti na detail faktúry.
@@ -411,10 +422,10 @@ FIGMA:
 
 | Akcia | Účel | Dostupnosť |
 |---|---|---|
-| Otvoriť Úpravu faktúry | Prechod na obrazovku, kde sa údaje menia | Podľa editovateľnosti faktúry |
-| Na odoslanie | Odoslanie faktúry bez potreby úprav | Ak faktúra nevyžaduje úpravy |
-| Odložiť | Odloženie faktúry; vyžaduje poznámku | Ak faktúra nevyžaduje úpravy |
-| Stornovať | Stornovanie faktúry; vyžaduje poznámku | Ak faktúra nevyžaduje úpravy |
+| Otvoriť Úpravu faktúry | Prechod na obrazovku, kde sa údaje menia | Podľa editovateľnosti faktúry v danom statuse |
+| Na odoslanie | Odoslanie faktúry bez otvorenia obrazovky úpravy | Podľa stavového modelu |
+| Odložiť | Odloženie faktúry; vyžaduje poznámku | Podľa stavového modelu |
+| Stornovať | Stornovanie faktúry; vyžaduje poznámku | Podľa stavového modelu |
 | Uložiť obraz faktúry | Stiahnutie PDF pre priloženie k požiadavke do iProc | Povinne v statusoch 2 a 3; v ostatných statusoch vítané |
 | Stiahnuť prílohy | Uloženie príloh na interné úložisko | Ak faktúra obsahuje prílohy |
 
@@ -426,11 +437,12 @@ FIGMA:
 
 | Vlastnosť | Popis |
 |---|---|
+| Kedy sa používa | Pri priradení dodávateľa, ktorého kontrola A nenašla (status 2), aj pri oprave nesprávne priradeného dodávateľa |
 | Vstup | Spracovateľ zadá časť názvu dodávateľa alebo časť IČO |
 | Správanie systému | Systém priebežne ponúka všetkých dodávateľov z ODS, ktorí zadanej hodnote zodpovedajú |
 | Obsah ponuky | Pri každom kandidátovi sú viditeľné údaje, s ktorými je založený v ODS, aby ich spracovateľ vedel odlíšiť |
 | Výsledok výberu | Systém prevezme Oracle vendor ID a SAP ID a spustí kontrolu B aj C |
-| Dostupnosť | Vo všetkých statusoch, v ktorých je faktúra editovateľná |
+| Dostupnosť | Vo všetkých statusoch, v ktorých je faktúra editovateľná (viď otázka 18) |
 
 **Rozloženie akčnej lišty**
 
@@ -461,14 +473,14 @@ FIGMA:
 | Súčasné zobrazenie s údajmi | Na obrazovke Úprava faktúry | Vždy |
 | Podsvietenie zdroja údaja | Pri prechode tabulátorom po editovateľných poliach sa zdroj podsvieti nažlto | Na obrazovke Úprava faktúry |
 | Uloženie ako PDF | Spracovateľ stiahne obraz na úložisko a priloží ho k požiadavke do iProc na založenie dodávateľa alebo čísla účtu | Povinne v statusoch 2 a 3; v ostatných statusoch vítané, nie povinné |
-| Preklik z iProc | Obraz musí byť dostupný z aplikácie iProc; spôsob prepojenia je otvorený (viď otázka 20) | Vždy |
+| Preklik z iProc | Obraz musí byť dostupný z aplikácie iProc; spôsob prepojenia je otvorený (viď otázka 21) | Vždy |
 
 ### Polia
 
 | Názov poľa | Validation | Mandatory | Editable | Popis | Poznámka |
 |---|---|---|---|---|---|
 | Poznámka spracovateľa | Povinná pri statusoch 2, 3, 5, 7 a pri reexporte zo statusu 10; pri opakovanej zmene statusu výzva na ďalšiu poznámku | Podmienene áno | Áno | Informácia o spôsobe riešenia položky | - |
-| Obchodný partner (dodávateľ) | Kontrola A; vyhľadanie a výber správneho dodávateľa z ODS podľa časti názvu alebo IČO | N/A | Áno - výber z ODS vo všetkých statusoch, kde je faktúra editovateľná | Názov dodávateľa | Pri zmene systém prevezme Oracle vendor ID a SAP ID a spustí kontrolu B aj C (AT 1d) |
+| Obchodný partner (dodávateľ) | Kontrola A; vyhľadanie a výber dodávateľa z ODS podľa časti názvu alebo IČO | N/A | Áno - výber z ODS vo všetkých statusoch, v ktorých je faktúra editovateľná, vrátane statusov 2 a 3 | Názov dodávateľa | Pri zmene systém prevezme Oracle vendor ID a SAP ID a spustí kontrolu B aj C (AT 1d). V statuse 2 je to jediná cesta, ako faktúru odblokovať bez čakania na automatické overenie ODS. (OTVORENY BOD: viď otázka 18) |
 | Číslo bankového účtu | Kontrola B | (xls) | Logika výberu podľa xls | - | NEŠPECIFIKOVANÉ detailne (xls) |
 | Číslo faktúry | Kontrola C - duplicita: DIČ + číslo + dátum vystavenia - stop | N/A | Iba v statuse 4 (fallback: aj v statuse 9) a v statuse 11; inak needitovateľné | Úprava hviezdičkou a dátumom pri oprávnenej duplicite | Systém odstraňuje medzery (AT 8d) |
 | Variabilný symbol | VS nezačína 0 (pri automatickom doplnení) | N/A | Iba ak VS nie je uvedený na faktúre; inak needitovateľné | Automatické doplnenie: prvých 10 číselných znakov čísla faktúry | - |
@@ -482,8 +494,8 @@ FIGMA:
 | Číslo zmluvy | (xls) | (xls) | Áno | Doplní spracovateľ; ideál: hodnota 86xxxxxx v kombinácii so spojením číslo zmluvy alebo CPA | - |
 | IČ DPH dodávateľa | Kontrola voči ODS - upozornenie so zobrazením hodnoty z ODS | N/A | Nie | IČ DPH dodávateľa z faktúry | Ak dodávateľ v kmeňových dátach nemá DIČ, pole sa vyčervení; spracovanie pokračuje |
 | IČ DPH odberateľa | Kontrola A1 - porovnanie s pevnou hodnotou SK7020000944; neporovnáva sa voči ODS | N/A | Nie | IČ DPH odberateľa uvedené dodávateľom na faktúre | Pri nezhode oranžový warning; faktúra pokračuje v procese. (OTVORENY BOD: atribút XML - viď otázka 17) |
-| Číslo dodávateľa iProc | Read-only | N/A | Nie | Oracle vendor ID z ODS | Pri zmene dodávateľa sa prevezme od nového dodávateľa |
-| Číslo dodávateľa SAP | Read-only | N/A | Nie | SAP ID z ODS | Pri zmene dodávateľa sa prevezme od nového dodávateľa |
+| Číslo dodávateľa iProc | Read-only | N/A | Nie | Oracle vendor ID z ODS | Pri zmene dodávateľa sa prevezme od vybraného dodávateľa |
+| Číslo dodávateľa SAP | Read-only | N/A | Nie | SAP ID z ODS | Pri zmene dodávateľa sa prevezme od vybraného dodávateľa |
 | Verified by | Read-only | N/A | Nie | TB toho, kto označil faktúru na odoslanie; posiela sa do iProc cez abbyy webservice | - |
 | Číslo interné | Read-only | N/A | Nie | Voucher number z iProc po zaevidovaní | - |
 | Chyba z iProc | Read-only | N/A | Nie | Chybové hlásenie pri statuse 9; prichádza v poli Processing Notes | Pôvod chyby sa rozlišuje podľa prefixu hlášky |
@@ -492,11 +504,15 @@ FIGMA:
 | Dodávateľ-Zamestnanec | - | - | Rozvoj do budúcna | Dnes sa napĺňa priamo v iProc | Nie je súčasťou prvej fázy |
 | Payment Reason Comment | - | - | Rozvoj do budúcna | | |
 
+**Poznámka pre vývoj:** editovateľnosť polí je podmienená kombináciou statusu a typu faktúry - ide o dve nezávislé dimenzie, ktoré treba vyhodnocovať súčasne. V statusoch 8 a 10 nie je možné editovať žiadne dáta okrem prípadu reexportu. Statusy 2 a 3 nie sú manuálne meniteľné, spracovateľ ich opúšťa zmenou dát - dohľadaním dodávateľa, výberom iného bankového účtu alebo výberom spôsobu úhrady. Každá zmena poľa aj každá automatická systémová zmena musí byť zalogovaná s pôvodnou a novou hodnotou, dátumom a TB spracovateľa.
+
+**Poznámka pre testovanie:** overiť editovateľnosť každého poľa vo všetkých statusoch a pre všetky typy faktúr; dohľadanie dodávateľa v statuse 2 aj opravu nesprávneho dodávateľa v statuse 1 vrátane spustenia kontroly B aj C; automatické doplnenie variabilného symbolu vrátane podmienky, že nezačína 0; odstránenie medzier z čísla faktúry; červenú bunku pri prázdnom Č. pôvodnej faktúry pre typy 381 a 383; vyhodnotenie faktúry ako ťarchopisu pri naplnenom Č. pôvodnej faktúry pri inom type; prepočet dobropisu na záporné hodnoty; automatiku účtu pri spôsobe úhrady 2 až 5; oranžové upozornenie pri nezhode IČ DPH odberateľa; uloženie obrazu faktúry v statusoch 2 a 3; návrat do zoznamu po odoslaní, odložení aj stornovaní; a celý tok odoslania 6 → 8 → 10 vrátane troch chybových scenárov.
+
 ## API
 
 - **iProc:** odoslanie dát faktúry na existujúce API iProc vrátane príloh a obrazu faktúry; spätné potvrdenie s interným číslom dokladu a číslom dodávateľa; rozlíšenie chyby iProc vs eInvoice. Chybové hlásenie prichádza v poli Processing Notes; pôvod chyby sa rozlišuje podľa prefixu (`iProc - TBwsProc:` = ORACLE, `iProc - TBwsProc FC:` = ABBYY). Známe kódy: E037 duplicita, E046 neplatné číslo objednávky. (OTVORENY BOD: úplná špecifikácia API, zoznam chybových kódov, technický spôsob spätného prenosu, spôsob preklopenia príloh)
-- **ODS:** export dodávateľov (názov, bankové spojenie, IČO, IČ DPH, adresa) ako referenčné dáta kontrol. V ODS sú iba údaje dodávateľa - kontrola A1 nad IČ DPH odberateľa preto voči ODS neprebieha. Systém je nastavený tak, že dodávateľ a číslo účtu budú v ODS najskôr nasledujúci deň po prijatí faktúry. Rozhranie musí umožniť vyhľadávanie dodávateľa podľa časti názvu alebo IČO a vrátiť údaje, s ktorými je dodávateľ v ODS založený, aby spracovateľ vedel kandidátov odlíšiť (AT 1d). (OTVORENY BOD: technický spôsob a frekvencia)
-- **Obraz faktúry:** dodávateľské faktúry prídu do eInvoice výhradne v XML. Polia sa v obraze usporiadajú podľa poradia, v akom sú uvedené v XML; mapovanie atribútov sa nevykonáva. Polymorfné XML atribúty vyriešia architekt a vývoj. Obraz musí byť generovateľný ako PDF na stiahnutie, povinne v statusoch 2 a 3 (viď otázka 12), a dostupný na preklik z iProc (viď otázka 20).
+- **ODS:** export dodávateľov (názov, bankové spojenie, IČO, IČ DPH, adresa) ako referenčné dáta kontrol. V ODS sú iba údaje dodávateľa - kontrola A1 nad IČ DPH odberateľa preto voči ODS neprebieha. Systém je nastavený tak, že dodávateľ a číslo účtu budú v ODS najskôr nasledujúci deň po prijatí faktúry. Rozhranie musí umožniť vyhľadávanie dodávateľa podľa časti názvu alebo IČO a vrátiť údaje, s ktorými je dodávateľ v ODS založený, aby spracovateľ vedel kandidátov odlíšiť (AT 1d). (OTVORENY BOD: technický spôsob a frekvencia - viď otázka 11)
+- **Obraz faktúry:** dodávateľské faktúry prídu do eInvoice výhradne v XML. Polia sa v obraze usporiadajú podľa poradia, v akom sú uvedené v XML; mapovanie atribútov sa nevykonáva. Polymorfné XML atribúty vyriešia architekt a vývoj. Obraz musí byť generovateľný ako PDF na stiahnutie, povinne v statusoch 2 a 3 (viď otázka 12), a dostupný na preklik z iProc (viď otázka 21).
 - **Prílohy faktúry:** prílohy sa preklápajú do iProc spolu s obrazom faktúry a musí byť možné ich stiahnuť a uložiť na interné úložisko. (OTVORENY BOD: technická realizácia a väzba na FileNet DMS - viď otázka 13; obsah a podoba príloh - viď otázka 14)
 - **Digitálny poštár:** zdroj došlej faktúry (XML uložené tak, ako prišlo)
 
@@ -519,10 +535,16 @@ FIGMA:
 
 ---
 
-**Tri poznámky k tejto verzii**
+## Čo som pri kontrole overoval
 
-Požiadavka na prílohy je nová a má širší dosah, než sa na prvý pohľad zdá. Znamená, že do iProc sa neposielajú len dáta faktúry, ale aj obraz a prílohy - to je vec, ktorú treba potvrdiť na strane abbyy webservicu. Pridal som ju do kroku 12 hlavného toku a do API.
+**Krížové odkazy na otázky.** Prešiel som všetkých 21 otázok a každý odkaz v texte. Odkazy na otázky 4, 11, 12, 13, 14, 15, 16, 17, 18, 20 a 21 sedia. Otázky 1 až 3, 5 až 10 a 19 sa v texte odkazom nespomínajú, čo je v poriadku - sú to samostatné otvorené body.
 
-Pri prílohách mi nesedí jedna vec, preto som otvoril otázku 14. Ak dodávateľské faktúry prídu do eInvoice výhradne v XML, tak prílohy musia byť buď vložené priamo v XML, alebo prichádzajú od poštára samostatne. To sú dve odlišné technické situácie a vývojár to bude potrebovať vedieť.
+**Odkazy na alternatívne toky.** AT 1a odkazuje na AT 1d a AT 2a, AT 1b na AT 2a, AT 12c na AT 1c, AT 9c na AT 9a a AT 9b. Všetky cieľové toky existujú.
 
-Vyhľadávanie dodávateľa opísané biznisom je typické správanie našepkávača - používateľ píše a systém priebežne ponúka zodpovedajúce záznamy. Pri objeme kmeňových dát to znamená požiadavku na rozhranie ODS, ktoré vie vyhľadávať podľa časti hodnoty, nie iba podľa presnej zhody. Doplnil som to do sekcie API, keďže je to vec, ktorú treba s Peťom potvrdiť.
+**Odkazy na kroky hlavného toku.** Overil som, že AT 6a, AT 8a až 8d, AT 9a až 9e, AT 12b a AT 14a odkazujú na kroky, ktoré v štrnásťkrokovom toku existujú a dávajú zmysel.
+
+**Konzistencia troch nových pravidiel.** Dohľadanie dodávateľa je teraz opísané rovnako v biznis zadaní, v AT 1a, v AT 1d, v tabuľke Obrazovky 2 aj v riadku Obchodný partner. Dostupnosť akcií na detaile je rovnako v biznis zadaní, AT 6a a v tabuľke akcií Obrazovky 1. Návrat do zoznamu je uvedený v kroku 13, AT 6a, AT 9d, AT 9e, vo výstupných podmienkach aj v pravidlách Obrazovky 2.
+
+**Odkazy na iné UC.** Všade UC-201 a UC-203 podľa aktuálneho stromu v Confluence, žiadne pozostatky po UC-06 ani UC-902.
+
+**Čo zostalo neuzavreté a vedome.** Poznámka pre vývoj hovorí, že statusy 2 a 3 nie sú manuálne meniteľné, a zároveň je v nich dostupné dohľadanie dodávateľa. Nie je to rozpor - status sa nemení priamo akciou, ale zmenou dát, ktorá spustí kontroly. Formuloval som to tak, aby to bolo zrejmé, ale ak by to pri review niekoho zaskočilo, je to vysvetliteľné.
