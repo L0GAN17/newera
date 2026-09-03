@@ -1,325 +1,521 @@
-# UC0401 \- Príprava \- Overenie čísla účtu
+Vytvoril som UC0407. Mockup ale odhalil vec, ktorá mení pôvodnú predstavu z AT1 - píšem o tom hneď za UC.
+
+---
+
+# UC0407 - Príprava - Overenie klienta - manuálne
 
 ## Obsah
 
+- Obsah
+- Info
+  - Otvorené otázky
+  - Biznis zadanie
+  - Aktéri
+- Vstupné podmienky
+- Hlavný tok
+- Alternatívny tok
+- Diagram tokov
+- Výstupné podmienky
+- Opis obrazoviek + Validácie
+- API
+- Mapping
+
+---
+
 ## Info
 
-**Otvorené otázky**
+### Otvorené otázky
 
-- **Zdroj príznaku povinného variabilného symbolu:** UC0401 má podľa dohody z review poskytnúť nadväzujúcemu UC0403 informáciu, či účet vyžaduje povinný variabilný symbol. Response AccountEnquiryEnterprise takýto príznak neobsahuje. Matúš Radušovský spomenul že ide o tabuľku TIDP014 na AS400. Treba potvrdiť, či ide o samostatný dopyt v rámci UC0401 alebo o rozšírenie AccountEnquiryEnterprise
-- **Prechodné účty:** ako sú v CBS definované a či ich CashBox má akceptovať....
-- - **Kde sa ukladajú údaje počas rozpracovanej transakcie.** Vývojár uviedol, že pre vklady aj výbery existuje pomocná tabuľka deposit, ktorá slúži ako cache pre priebežné údaje transakcie. Zároveň však pripustil, že môže ísť aj o dočasné držanie údajov v pamäti aplikácie bez zápisu do databázy. Tabuľka deposit v aktuálnom dátovom modeli CashBox nie je. Treba rozhodnúť, či sa údaje z UC0401 zapisujú do tabuľky deposit, alebo sa držia len v pamäti aplikácie. Rozhodnutie má vplyv aj na UC0402 - Príprava - Overenie klienta a UC0403 - Príprava - Natypovanie transakcie, kde je uvedený rovnaký princíp. Odpoveď od vývoja, téma na analytický meeting. Blokuje dokončenie UC. Dopad: mení sa krok 7 hlavného toku, výstupné podmienky a sekcia Mapping.
+**1. Vyhladava sa v UC0407 vobec? → Feri**
 
-**Biznis zadanie**
+```
+Toto je najdolezitejsia otazka a od nej zavisi cely tok.
 
-Overenie existencie čísla účtu v CBS. Cieľom je zistiť, či zadané číslo účtu má správny tvar a formát a či sa nachádza v CBS. UC0401 overuje len formát a existenciu ako vstupnú podmienku pre nadväzujúce UC. Či je účet otvorený, klientsky, TB a neblokovaný rieši až UC0404 - Kontrola uskutočniteľnosti (vklady) / UC0504 - Kontrola uskutočniteľnosti (výbery).
+V mockupe modalu Informacie o vkladatelovi nie je ziadne tlacidlo Vyhladat.
+Vyzera to tak ze teller proste vyplni vsetko rucne a potvrdi.
 
-Ak účet existuje, systém si z response rovno potiahne časti API, ktoré potrebujú nadväzujúce UC (aby sa dopyt nerobil duplicitne).
+Ty si ale pisal ze "len pri klientovi vieme ostatne polia doplnit ako je rodne
+cislo, tituly atd". To znamena ze pri klientovi sa nieco dotahuje. Lenze
+z mockupu nevidim co to spusti.
 
+Cize ako to ma fungovat?
+
+a) Teller vyplni vsetko rucne, nic sa nikam nevola. Vtedy ale nevieme ci je
+   osoba klientom a nevieme ani jej vztah k uctu, co potrebuje UC0431.
+
+b) Teller zada rodne cislo alebo CCAID a system sam dotiahne zvysok z GateGlobal.
+   Vtedy ale potrebujem vediet ktore pole to spusti a ci sa to deje automaticky
+   po vyplneni alebo tam ma byt tlacidlo Vyhladat ktore v mockupe chyba.
+
+Bez toho neviem napisat hlavny tok.
+```
+
+Blokuje dokončenie UC. Dopad: mení sa celý hlavný tok a sekcia API.
+
+**2. Ako zistime ze osoba je klientom → Feri**
+
+```
+V UC0402 to bolo jednoduche - v prekliku pride pole ccaId a podla neho vieme
+ci je klient.
+
+Tu ale preklik nemame. V modale je policko CCAID ktore vyzera ze ho moze
+vyplnit teller. Cize:
+
+- Vyplna CCAID teller rucne? Odkial ho zoberie?
+- Alebo sa dopĺňa automaticky ked sa osoba najde v GateGlobal?
+- A co ked ho teller necha prazdne, berieme to tak ze osoba nie je klientom?
+
+To iste plati pre CIF a PID.
+```
+
+Blokuje dokončenie UC. Dopad: mení sa hlavný tok a Opis obrazoviek.
+
+**3. Vola sa aj tu ProductCBIAuthorizedSubjects → Matus Radusovsky**
+
+```
+Pri UC0402 sme sa dohodli ze vztah osoby k uctu zistuje UC0402 volanim
+ProductCBIAuthorizedSubjects a priznak potom pouziva UC0431 pri poplatku.
+
+Ked UC0407 nahradza UC0402 pri priamom vstupe, tak by ho mal volat tiez, inak
+by UC0431 nemal z coho brat priznak a poplatok by sa nevypocital spravne.
+
+Sedi to tak? A co ked osoba nema CCAID - tá sluzba potrebuje identifikator
+subjektu. Beriem to tak ze bez CCAID osoba nemoze mat vztah k uctu a teda ide
+automaticky o vklad tretou osobou, cize poplatok sa plati hned. Je to spravna
+uvaha?
+```
+
+Blokuje dokončenie UC. Dopad: mení sa hlavný tok a sekcia API.
+
+**4. Ako teller identifikuje cudzinca → Feri**
+
+```
+V mockupe je rodne cislo ako nepovinne pole, co sedi s tym ze cudzinci ho nemaju.
+
+Ale ak sa v UC0407 nieco vyhladava (viz otazka 1), tak podla coho sa vyhlada
+cudzinec ktory je klientom TB ale rodne cislo nema? Podla CCAID? Podla PID?
+
+A ak sa nevyhladava nic, tak je to bezpredmetne.
+```
+
+Blokuje dokončenie UC. Dopad: mení sa hlavný tok.
+
+**5. Rozdiel medzi X a Zrusit → Anka**
+
+```
+Modal ma vpravo hore kriz na zatvorenie a dole tlacidlo Zrusit. Robia to iste
+alebo je medzi nimi rozdiel?
+
+A co sa stane ked teller da Zrusit - vrati sa na obrazovku vkladu a moze modal
+otvorit znova, alebo sa cela transakcia zrusi?
+```
+
+Blokuje dokončenie UC, bez toho nie je testovateľný. Dopad: mení sa alternatívny tok.
+
+**6. Ma byt Potvrdit neaktivne kym nie su vyplnene povinne polia → Feri alebo Anka**
+
+```
+V UC0403 to tak mame - tlacidlo Potvrdit je neaktivne kym nie su vyplnene
+povinne polia a chybova hlaska sa nezobrazuje.
+
+Navrhujem to iste aj tu, nech je to konzistentne. V mockupe je Potvrdit modre
+ale to je asi len ako vyzera ked uz je vsetko vyplnene.
+
+Sedi to?
+```
+
+Blokuje dokončenie UC. Dopad: mení sa Opis obrazoviek.
+
+**7. Kto rozhoduje ci sa zavola UC0402 alebo UC0407 → Feri a Matej Pastucha**
+
+```
+UC0402 riesi len preklik z GATE, UC0407 len priamy vstup do CashBoxu. Cize
+niekto musi rozhodnut ktory z tych dvoch sa zavola.
+
+Su to realizacne UC vkladu a vyberu, alebo je nad tym nieco ine? Aby to vyvojar
+vedel naprogramovat.
+```
+
+Blokuje dokončenie UC. Dopad: mení sa Biznis zadanie a Vstupné podmienky.
+
+**8. Preco nie je tabulka deposit v datovom modeli → vyvoj**
+
+```
+Rovnaka otazka ako pri UC0401, UC0402 a UC0403. Podla vyvojara sa udaje pocas
+rozpracovanej transakcie ukladaju do pomocnej tabulky deposit, konkretne udaje
+o osobe do stlpca depositor_info. Ta tabulka bola aj v starsej verzii datoveho
+modelu, ale v aktualnom cashbox_db.png uz nie je.
+
+Cize preco zmizla z modelu a plati ze sa tam udaje o osobe ukladaju?
+```
+
+Blokuje dokončenie UC. Dopad: mení sa sekcia Mapping.
+
+**9. Ake opravnenia znamenaju Konatel, Vkladatel a Disponent → Matus Radusovsky**
+
+```
+Rovnaka otazka ako pri UC0402. Majitela viem rozpoznat podla priznaku
+IS_OWNER_FLAG v ciselniku CCD_ROLE_TYPE, ale konatel, vkladatel a disponent
+v podklade nie su.
+
+Plati len ak sa potvrdi ze UC0407 vola ProductCBIAuthorizedSubjects.
+```
+
+Blokuje dokončenie UC, ak sa potvrdí volanie služby. Dopad: naplnenie konfiguračného zoznamu oprávnení.
+
+**10. Kto je vlastnikom UC0407 → Matej Pastucha**
+
+```
+V status subore mas UC0407 pridelene ako TODO. Ja som ho teraz spisal, lebo
+Feri rozhodol ze tam ma ist scenar priameho vstupu ktory som mal v UC0402
+ako alternativny tok.
+
+Nech si to nerobime dvakrat - berieš si to spat alebo to necham u seba?
+```
+
+Neblokuje. Dopad: žiadny na obsah UC.
+
+### Biznis zadanie
+
+UC slúži na overenie **osoby, ktorá je fyzicky prítomná pred tellerom** a vykonáva transakciu, v prípade, keď teller spustil transakciu **priamo v CashBoxe bez prekliku z aplikácie GATE**.
+
+Cieľom je získať kompletnú sadu identifikačných údajov o tejto osobe rovnako ako pri UC0402, teda vrátane príznaku, či je osoba klientom banky, a jej vzťahu k účtu.
+
+**Rozdiel oproti UC0402.** Pri prekliku z GATE prichádzajú údaje o osobe z aplikácie GATE. Tu neprichádza nič a teller ich zadáva ručne.
+
+| Situácia | Rieši |
+|---|---|
+| Teller prišiel do CashBoxu preklikom z GATE | UC0402 - Príprava - Overenie klienta |
+| Teller spustil transakciu priamo v CashBoxe | **UC0407** |
+
+[OTVORENY BOD: kto rozhoduje, ktorý z týchto dvoch UC sa zavolá]
+
+**Doklad totožnosti.** Teller zapisuje doklad, ktorý osoba **fyzicky predložila**, nie doklad uložený v systéme banky. Tie sa môžu líšiť, napríklad ak osoba predloží pas a banka má v systéme občiansky preukaz. Preto sa údaje o doklade v UC0407 vypĺňajú vždy manuálne a systém ich z GateGlobal neodvodzuje. Platí to rovnako pre klienta aj neklienta (potvrdil Feri).
+
+**Rozsah UC0407.** Do UC0407 patrí manuálne zadanie identifikačných údajov o osobe, vyhodnotenie príznaku Klient / Neklient a zistenie vzťahu osoby k účtu. Do UC0407 **nepatrí**:
+
+| Čo | Rieši |
+|---|---|
+| Overenie osoby pri prekliku z GATE | UC0402 - Príprava - Overenie klienta |
+| Overenie čísla účtu | UC0401 - Príprava - Overenie čísla účtu |
+| Overovanie účtu, teda Brand, AccountStatus, AccountSubType, blokácie a disponibilný zostatok | UC0404 - Príprava - Kontrola uskutočniteľnosti (vklady), UC0504 (výbery) |
+| Vyhodnotenie whitelistu | UC0404 - Príprava - Kontrola uskutočniteľnosti (vklady), UC0504 (výbery) |
+| Výpočet poplatku za vklad | UC0431 - Poplatok za vklad - Stanovenie výšky |
+| Dotiahnutie údajov o právnickej osobe alebo FOP | [OTVORENY BOD: v ktorom UC sa rieši] |
+
+**Vzťah k susedným UC.** UC0407 beží **po** UC0401 - Príprava - Overenie čísla účtu, rovnako ako UC0402. Dôvod je zhodný: zistenie vzťahu osoby k účtu vyžaduje IBAN účtu, ktorý dotiahne UC0401.
+
+**Výstup UC0407 je zhodný s výstupom UC0402.** Nadväzujúce UC nerozlišujú, ktorým z týchto dvoch UC boli údaje získané, a pracujú s rovnakými príznakmi.
 
 ### Aktéri
 
 | Aktér | Čo v tomto UC robí |
 |---|---|
-| **Teller** | Zadáva číslo účtu vo formáte BBAN. Je to jediná vstupná akcia v tomto UC. Pri chybe zostáva na obrazovke zadania, môže číslo opraviť a zadať znova, alebo z transakcie vystúpiť |
-| **Supervízor-Teller** | V UC0401 nevykonáva žiadnu akciu. Uvedený je preto, že transakciu môže realizovať aj používateľ s rolou Supervízor-Teller, ktorý v tom prípade vystupuje v úlohe tellera. Žiadne schvaľovanie ani override sa v UC0401 nevyžaduje |
-| **Systém** | Vykonáva všetky ostatné kroky. Lokálne validuje formát čísla účtu a MOD11, prevádza BBAN na IBAN, overuje dostupnosť CBS, volá rozhranie AccountEnquiryEnterprise, vyhodnocuje odpoveď, ukladá dáta pre nadväzujúce UC a zobrazuje hlášky |
+| **Teller** | Zadáva všetky identifikačné údaje o osobe manuálne podľa dokladu, ktorý mu osoba fyzicky predložila. Potvrdzuje alebo ruší zadanie |
+| **Supervízor-Teller** | V UC0407 nevykonáva žiadnu akciu. Uvedený je preto, že transakciu môže realizovať aj používateľ s rolou Supervízor-Teller, ktorý v tom prípade vystupuje v úlohe tellera. Žiadne schvaľovanie ani override sa v UC0407 nevyžaduje |
+| **Systém** | Zobrazuje formulár, vyhodnocuje príznak Klient / Neklient a vzťah osoby k účtu, ukladá údaje pre nadväzujúce UC |
+
+---
 
 ## Vstupné podmienky
 
 - Teller je prihlásený
 - Pobočka je otvorená
 - Pokladňa je otvorená
-- Systém eviduje aktuálnu dostupnosť centrálneho bankového systému v tabuľke as400\_values (stĺpec is\_online). Ak je evidovaný ako nedostupný (is\_online = false), transakcia sa nezačína (viď AT2)
+- UC je vyvolaný len počas klientskych transakcií, teda vkladov, výberov alebo rozmieňania
+- **Teller spustil transakciu priamo v CashBoxe.** Preklik z aplikácie GATE neprebehol. Ak by preklik prebehol, overenie osoby rieši UC0402 - Príprava - Overenie klienta a UC0407 sa nevyvoláva
+- Prebehol UC0401 - Príprava - Overenie čísla účtu. Číslo účtu je overené a v kontexte transakcie je k dispozícii IBAN potrebný na zistenie vzťahu osoby k účtu
+- V lokálnej databáze CashBox je naplnený číselník `id_card_type` a v ODS číselník `ODS_SA.CCD_COUNTRY`
 
-
+---
 
 ## Hlavný tok
 
-** Hlavný scenár:**
+**Poznámka k rozsahu.** Nasledujúci tok je popísaný podľa mockupu obrazovky Informácie o vkladateľovi, ktorý neobsahuje funkciu vyhľadania osoby. Ak sa potvrdí, že v UC0407 prebieha dotiahnutie údajov z rozhrania GateGlobal, tok sa rozšíri o príslušné kroky. [OTVORENY BOD: viď otázka 1]
 
-1. Teller zadá do obrazovky číslo účtu vo formáte BBAN
-2. Systém lokálne validuje formát čísla účtu, povolené sú len číselné znaky a dĺžka presne 10 znakov:
-    - Ak formát sedí, UC pokračuje nasledujúcim krokom
-    - Ak formát nesedí, tok pokračuje **AT1**
-3. Systém vykoná kontrolu MOD11 nad celým 10-miestnym číslom účtu. Kontrola beží lokálne v CashBoxe pred dopytom do CBS:
-    - Ak je číslo bezo zvyšku deliteľné 11, UC pokračuje nasledujúcim krokom
-    - Ak číslo bezo zvyšku deliteľné 11 nie je, tok pokračuje **AT1**
-4. Systém prevedie zadaný BBAN do tvaru IBAN pre volanie rozhrania
-5. Systém overí dostupnosť centrálneho bankového systému podľa `as400_values.is_online` a vykoná dopyt cez rozhranie AccountEnquiryEnterprise 2v2 s parametrami podľa sekcie API:
-    - Ak je `is_online = true` a systém odpovie, UC pokračuje nasledujúcim krokom
-    - Ak je `is_online = false` alebo systém neodpovie, tok pokračuje **AT2**
-6. Systém vyhodnotí odpoveď rozhrania:
-    - Ak odpoveď neobsahuje chybu, účet v CBS existuje a UC pokračuje nasledujúcim krokom
-    - Ak odpoveď obsahuje chybu s kódom HIS0251, účet v CBS neexistuje a tok pokračuje **AT3**
-7. Systém uloží kompletnú odpoveď rozhrania vrátane všetkých vrátených údajov o účte tak, aby boli k dispozícii nadväzujúcim UC bez opakovaného volania CBS. Zoznam polí je v sekcii API. [OTVORENY BOD: či sa údaje zapisujú do pomocnej tabuľky deposit, alebo sa držia len v pamäti aplikácie počas rozpracovanej transakcie, viď sekcia Mapping]
-8. Systém ukončí UC s úspechom a odovzdá uložené údaje nadväzujúcim UC
+1. Systém zobrazí tellerovi modálne okno Informácie o vkladateľovi. Všetky polia sú prázdne a editovateľné.
+2. Teller zadá identifikačné údaje o osobe podľa dokladu totožnosti, ktorý mu osoba fyzicky predložila:
+   - priezvisko, meno a prípadne titul
+   - rodné číslo, ak ho osoba má
+   - dátum narodenia
+   - druh dokladu, číslo dokladu a krajinu vystavenia dokladu
+3. Teller prípadne zadá identifikátory osoby v banke, teda CCAID, CIF a PID. Polia sú nepovinné. [OTVORENY BOD: odkiaľ teller tieto hodnoty berie, viď otázka 2]
+4. Systém priebežne vyhodnocuje, či sú vyplnené všetky povinné polia:
+   - Ak povinné polia vyplnené nie sú, tlačidlo Potvrdiť zostáva neaktívne a chybová hláška sa nezobrazuje
+   - Ak sú povinné polia vyplnené, systém sprístupní tlačidlo Potvrdiť
+5. Teller zvolí Potvrdiť. Ak zvolí Zrušiť alebo modálne okno zatvorí, tok pokračuje **AT1**.
+6. Systém overí formát zadaných údajov podľa tabuľky kontrol v sekcii Opis obrazoviek + Validácie:
+   - Ak sú všetky údaje v správnom formáte, UC pokračuje nasledujúcim krokom
+   - Ak niektorý údaj v správnom formáte nie je, tok pokračuje **AT2**
+7. Systém vyhodnotí, či je osoba klientom banky:
+   - Ak je vyplnené pole CCAID, osoba je klientom TB
+   - Ak pole CCAID vyplnené nie je, osoba nie je klientom TB
+   
+   Systém výsledok uloží ako príznak pre nadväzujúce UC. Vyhodnotenie nie je blokujúce. [OTVORENY BOD: viď otázka 2]
+8. Systém zavolá rozhranie ProductCBIAuthorizedSubjects (v4) s identifikáciou účtu, teda s číslom účtu vo formáte IBAN prevzatým z UC0401 - Príprava - Overenie čísla účtu, a s identifikátorom osoby. Rozhranie vráti zoznam osôb, ktoré majú k danému účtu oprávnenie:
+   - Ak rozhranie odpovie, UC pokračuje nasledujúcim krokom
+   - Ak rozhranie nie je dostupné, tok pokračuje **AT3**
+   
+   [OTVORENY BOD: či sa rozhranie v UC0407 volá, viď otázka 3]
+9. Systém overí, či má osoba prítomná pred tellerom k účtu aspoň jedno oprávnenie zaradené v konfiguračnom zozname oprávnení zakladajúcich vzťah k účtu:
+   - Ak také oprávnenie má, systém uloží príznak, že osoba má vzťah k účtu
+   - Ak nemá žiadne, alebo ak osoba nemá CCAID, systém uloží príznak, že osoba vzťah k účtu nemá
+   
+   Vyhodnotenie nie je blokujúce. Príznak využíva UC0431 - Poplatok za vklad - Stanovenie výšky.
+10. Systém uloží zadané údaje o osobe tak, aby boli k dispozícii nadväzujúcim UC. [OTVORENY BOD: či sa údaje zapisujú do pomocnej tabuľky `deposit`, viď sekcia Mapping]
+11. Systém zatvorí modálne okno a ukončí UC s úspechom. Tok pokračuje v UC, z ktorého bol UC0407 vyvolaný, teda v príslušnom UC vkladu, výberu alebo rozmieňania.
+
+---
 
 ## Alternatívny tok
 
-AT1 - Číslo účtu je v nesprávnom tvare
+### AT1 - Teller zruší zadanie
 
-**Spúšťač:** Zadané číslo účtu nespĺňa formát (krok 2) alebo neprejde kontrolou MOD11 (krok 3).  
-  
-Krok v hlavnom toku: krok 2 alebo krok 3.
+**Spúšťač:** Teller v kroku 5 hlavného toku zvolí Zrušiť alebo zatvorí modálne okno krížikom.
+**Platí pre:** vklady, výbery aj rozmieňanie.
+**Krok v hlavnom toku:** krok 5.
 
-1\. Systém vyhodnotí, že číslo účtu je v nesprávnom tvare - obsahuje nečíselné znaky, má inú dĺžku ako 10 znakov, alebo nie je bezo zvyšku deliteľné 11.  
-2. Systém nevykoná konverziu na IBAN ani dopyt do CBS.  
-3. Systém zobrazí hlášku typu error E027 - "Zadane \[input-cislo\] je v nespravnom tvare."  
-4. Teller ostáva na obrazovke zadania čísla účtu. Zadaná hodnota zostáva viditeľná a editovateľná.  
-5. Teller zadá opravené číslo účtu a UC pokračuje krokom 2 hlavného toku, alebo z transakcie vystúpi a UC končí neúspešne.
+1. Systém zatvorí modálne okno bez uloženia zadaných údajov.
+2. Systém neuloží žiadny príznak o osobe.
+3. [OTVORENY BOD: kam sa teller dostane. Či sa vráti na obrazovku transakcie a môže modál otvoriť znova, alebo sa celá transakcia zruší. Viď otázka 5]
 
-AT2 - CBS je nedostupný
+### AT2 - Zadaný údaj nie je v správnom formáte
 
-**Spúšťač:** as400\_values.is\_online = false, alebo systém nedostane odpoveď na dopyt (krok 5).
-
-1\. Systém zistí nedostupnosť centrálneho bankového systému. Dostupnosť je priebežne evidovaná v tabuľke as400\_values (stĺpec is\_online). Nedostupnosť sa spravidla zistí ešte pred zadaním čísla účtu, tento alternatívny tok však pokrýva aj výpadok počas už rozpracovanej transakcie.
-
-2\. Systém zobrazí hlášku typu error E026 - "CBS je nedostupny, skuste to prosim neskor."
-
-3\. Systém nevykoná žiadnu transakciu.
-
-4\. Teller ostáva na obrazovke zadania čísla účtu, zadaná hodnota zostáva viditeľná a editovateľná.
-
-5\. Teller môže zopakovať pokus (tok pokračuje krokom 5 hlavného scenára, lokálne validácie už prebehli), zadať iné číslo účtu (krok 2) alebo z transakcie vystúpiť.
-
-AT3 - Účet v CBS neexistuje
-
-**Spúšťač:** CBS vráti v odpovedi chybu s kódom HIS0251.  
-**Platí pre:** vklady aj výbery.  
+**Spúšťač:** Systém v kroku 6 hlavného toku vyhodnotí, že niektorý zo zadaných údajov nespĺňa formát podľa tabuľky kontrol.
+**Platí pre:** vklady, výbery aj rozmieňanie.
 **Krok v hlavnom toku:** krok 6.
 
-1. Systém vyhodnotí, že číslo účtu je formátovo správne, ale CBS vrátil chybu s kódom **HIS0251**, [AccountEnquiryEnterprise\_BBSS\_2v2.](https://rbinternational.sharepoint.com/:w:/r/sites/TBSK-EnterpriseArchitecture/AppLib/Integration%20Systems/MW_APP/2%20Interface%20Specifications/MW_APP.AccountEnquiryEnterprise/AccountEnquiryEnterprise_2v2/AccountEnquiryEnterprise_BBSS_2v2.docx?d=w5f9e5c6326264536acaa8cc527f20f11&csf=1&web=1&e=zEXqy7)
-2. Systém vyhodnotí účet ako neexistujúci a ďalšie polia odpovede nevyhodnocuje.
-3. Systém zobrazí hlášku W014 - "Zadane cislo uctu neexistuje."
-4. Teller ostáva na obrazovke zadania čísla účtu. Zadaná hodnota zostáva viditeľná a editovateľná.
-5. Teller zadá nové číslo účtu a UC pokračuje krokom 2 hlavného toku, alebo z transakcie vystúpi a UC končí neúspešne.
+1. Systém zobrazí chybovú hlášku s popisom chyby. [OTVORENY BOD: v katalógu nie je schválená hláška pre nesprávny formát údajov o osobe]
+2. Systém zvýrazní pole, ktoré chybu obsahuje.
+3. Teller opraví údaj.
+4. Teller zvolí Potvrdiť.
+5. UC pokračuje krokom 6 hlavného toku.
+
+### AT3 - Rozhranie ProductCBIAuthorizedSubjects nie je dostupné
+
+**Spúšťač:** Systém nedostane odpoveď z rozhrania ProductCBIAuthorizedSubjects.
+**Platí pre:** vklady, výbery aj rozmieňanie.
+**Krok v hlavnom toku:** krok 8.
+
+1. Systém zistí nedostupnosť rozhrania podľa vypršania timeoutu volania alebo podľa chybovej odpovede mimo biznisových chýb. [OTVORENY BOD: potvrdiť mechanizmus a hodnotu timeoutu]
+2. Systém nemá ako zistiť vzťah osoby k účtu a náhradný zdroj neexistuje.
+3. Systém zobrazí tellerovi chybovú hlášku o nedostupnosti služby. Návrh textu: "Sluzba pre overenie klienta je nedostupna, skuste to prosim neskor." [OTVORENY BOD: hláška nie je v katalógu, ide o návrh. Zhodná s návrhom v UC0402]
+4. Transakcia nemôže pokračovať a UC končí neúspešne.
+
+---
 
 ## Diagram tokov
 
+[OTVORENY BOD: diagram bude doplnený]
+
+---
 
 ## Výstupné podmienky
 
 **Úspech:**
-
-- Zadané číslo účtu má správny formát (10 číslic, prešlo kontrolou MOD11) a existuje v CBS
-- Systém má v kontexte transakcie uloženú kompletnú odpoveď z rozhrania AccountEnquiryEnterprise vrátane všetkých údajov o účte
-- Nadväzujúce UC môžu pracovať s uloženými dátami bez opakovaného volania CBS
-- Do databázy sa nezapisuje nič
-- - [OTVORENY BOD: či sa údaje zapisujú do pomocnej tabuľky deposit, alebo sa držia len v pamäti aplikácie]
+- Identifikačné údaje o osobe sú kompletné a zadané tellerom
+- Systém má uložený príznak, či je osoba klientom banky
+- Systém má uložený príznak vzťahu osoby k účtu
+- Nadväzujúce UC môžu pracovať s uloženými dátami
+- Tok pokračuje v UC, z ktorého bol UC0407 vyvolaný
+- Výstup je zhodný s výstupom UC0402 - Príprava - Overenie klienta
 
 **Zlyhanie:**
 
-| Druh zlyhania | Hláška | Čo sa nezapísalo | Kde sa teller nachádza |
-| --- | --- | --- | --- |
-| Číslo účtu má nesprávny tvar (AT1) | E027 | Nič, dopyt do CBS neprebehol | Na obrazovke zadania čísla účtu, môže zadať znova |
-| CBS je nedostupný (AT2) | E026 | Nič, transakcia sa nevykonala | Na obrazovke zadania čísla účtu, môže zopakovať pokus |
-| Účet v CBS neexistuje (AT3) | W014 | Nič, odpoveď sa neuložila | Na obrazovke zadania čísla účtu, môže zadať znova |
-
-Vo všetkých prípadoch teller ostáva na obrazovke zadania a rozhoduje sa, či zadá nové číslo alebo z transakcie vystúpi.
-
-
-## Opis Obrazoviek + Validácie
-
-Teller pracuje s jedným vstupným poľom. Jedinou aktivitou tellera v tomto UC je zadanie čísla účtu, všetko ostatné sú systémové kontroly a volania.
-
-| **Názov** | **Dátový typ** | **Validácia** | **M** | **E** | **Popis** | **Poznámka** |
-| --- | --- | --- | --- | --- | --- | --- |
-| Číslo účtu (BBAN) | Text | 1. len číselné znaky, dĺžka presne 10, deliteľné 11 (MOD11) 2. ak používateľ zadá napr. len 7 znakov, políčko (rám políčka) zčerveneje), musí nad políčkom bežať kontrola. 3. pri políčku môže byť ikona , ktora bude fungovať tak, že pri podržaní kurzora na ikone sa zobrazí text: *len číselné znaky, dĺžka presne 10* | Y | Y | Číslo účtu zadané tellerom | Do CBS sa posiela v tvare IBAN |
-
-
-
-#### Tabuľka kontrol
-
-| **#** | **Kontrola** | **Kde beží** | **Podmienka pre pokračovanie** | **Pri nesplnení** | **Testovateľné cez** |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Formát čísla účtu - znaky | CashBox lokálne | Len číselné znaky | E027, AT1 | Zadať alfanumerický vstup |
-| 2 | Formát čísla účtu - dĺžka | CashBox lokálne | Presne 10 znakov | E027, AT1 | Zadať 9 alebo 11 číslic |
-| 3 | MOD11 | CashBox lokálne, pred dopytom do CBS | Celé 10-miestne číslo je bezo zvyšku deliteľné 11 | E027, AT1 | Zadať 10-ciferné číslo, ktoré nie je deliteľné 11 |
-| 4 | Dostupnosť CBS | `as400_values.is_online` | `is_online = true` | E026, AT2 | Nastaviť `is_online = false`, prípadne simulovať výpadok |
-| 5 | Existencia účtu | CBS, rozhranie AccountEnquiryEnterprise 2v2 | Odpoveď neobsahuje chybu HIS0251 | W014, AT3 | Zadať platný BBAN neexistujúci v CBS |
-
-**Poznámka pre testovanie:** kontroly 1 až 3 musia zlyhať bez volania CBS. Ide o lokálnu pre-selekciu, ktorej účelom je nezaťažovať CBS dopytmi na zjavne chybné čísla.
-
-## API
-
-[2.3 AccountEnquiryEnterprise 2v2 - AppLib - ConfluenceIT](https://tbsk.atlassian.net/wiki/spaces/DOKIT/pages/19961248/2.3+AccountEnquiryEnterprise+2v2)
-
-#### Rozhranie
-
-**AccountEnquiryEnterprise 2v2** (AppLib, ConfluenceIT). Podrobná špecifikácia je v podklade *2.3 AccountEnquiryEnterprise 2v2*. Chybové kódy rozhrania nie sú predmetom tejto špecifikácie, platia podľa dokumentácie rozhrania.
-
-#### Request - parametre posielané z CashBoxu
-
-| **Element** | **Dátový typ** | **Hodnota z CashBoxu** |
-| --- | --- | --- |
-| RequestAuditInfo/ChannelID | string (číselník Business Architect List) |  |
-| RequestAuditInfo/AppName | string (číselník Application List) |  |
-| RequestAuditInfo/WorkstationID | string |  |
-| RequestAuditInfo/PostTime | dateTime | Dátum a čas odoslania requestu |
-| RequestAuditInfo/UserID | string | TB číslo zamestnanca |
-| RequestAuditInfo/ClientID | string | CCAID klienta |
-| RequestAuditInfo/ReferenceID | string |  |
-| RequestAuditInfo/SessionID | string |  |
-| RequestAuditInfo/Subversion | int | 2 (podľa BBSS posledná podporovaná subverzia) |
-| DataSource | string, enum RTDS / BOTH / ONLINE | ONLINE (poskytuje aktuálne údaje a niektoré údaje naviac; pri RTDS môže ísť o niekoľkominútový sklz a niektoré údaje sa neposkytujú) |
-| AccountNumberList/RetailAccountNumber | - | Neposiela sa z CashBoxu |
-| AccountNumberList/IBANAccountNumber | string | IBAN tvar účtu, prevedený z BBAN (viď krok 4 hlavného toku) |
-
-#### Vyhodnotenie odpovede
-
-| **Výsledok** | **Kritérium** | **Ďalší postup** |
-| --- | --- | --- |
-| Účet neexistuje | Odpoveď obsahuje chybu s kódom **HIS0251**, textový popis "Účet neexistuje", zdrojový systém AS400 | AT3, ďalšie polia odpovede sa nevyhodnocujú |
-| Účet existuje | Odpoveď neobsahuje chybu | Krok 7 hlavného toku, uloží sa kompletná odpoveď |
-
-`AccountStatus` sa v UC0401 nevyhodnocuje, je to predmetom UC0404 - Príprava - Kontrola uskutočniteľnosti alebo UC0504.
-
-
-#### Response - údaje ukladané do kontextu transakcie
-
-Ukladá sa kompletná odpoveď. Nasledujúce tabuľky sú úplný zoznam polí, ktoré rozhranie vracia, spolu s informáciou, ktorý nadväzujúci UC dané pole využíva.
-
-**Identifikácia účtu**
-
-| **Pole (AccDetail/)** | **Typ** | **Popis** | **Využíva** |
-| --- | --- | --- | --- |
-| RetailAccountNumber | decimal | Retailové číslo účtu | UC0403, realizačné UC |
-| IBANAccountNumber | string | IBAN tvar účtu | UC0403, realizačné UC |
-| CBSPresentBranch | string | Aktuálna pobočka, identifikátor v CBS (3 znaky) |  |
-| Brand | string | 001 = Tatra banka, 002 = Raiffeisen | UC0404 / UC0504 |
-| BrandClientID | long | CCA\_ID majiteľa účtu (podľa CIF) | UC0402 |
-| CurrencyCode | string | Kód meny účtu | UC0403 (predvolená mena transakcie) |
-| AccountName | string | Názov účtu | UC0403 |
-| AlternativeName | string | Alternatívny názov účtu (pri sporiacom účte) |  |
-| OpenDate | date | Dátum otvorenia účtu |  |
-| Note | string | Poznámka |  |
-
-**Stav a typ účtu**
-
-| **Pole (AccDetail/)** | **Typ** | **Popis** | **Využíva** |
-| --- | --- | --- | --- |
-| AccountStatus | string | O = open, C = close | UC0404 / UC0504 |
-| AccountSubType | string | N = nostro, L = loro, S = sporiaci, C = klientsky, NU = numerický, X = ostatné, V / V1 / V2 = vkladná knižka | UC0404 / UC0504 |
-| BlockDB | string (Y/N) | Blokované debetné operácie | UC0504 (výbery) |
-| BlockCR | string (Y/N) | Blokované kreditné operácie | UC0404 (vklady) |
-| SepaSecCode | string | 1 = bez ochrany, 2 = podmienené inkaso, 3 = nemožno inkasovať |  |
-| SpecialAccAttribute | string | BD = bytový dom, NU = notárska úschova, SVB = spoločenstvo vlastníkov, SUN = franchisista |  |
-| BundleId | string | ID balíka (kód balíka) |  |
-| StatementOwnerFlag | string (Y/N) | Význam neurčený v podklade |  |
-| LastClosedBankingDate | date | Dátum uzatvoreného bankového dňa, len pre neuzatvorené účty |  |
-
-**Zostatky a limity**
-
-| **Pole (AccDetail/)** | **Typ** | **Popis** | **Využíva** |
-| --- | --- | --- | --- |
-| Balances/ClosedClearBal | amount | Zostatok po uzávierke, bez pohybov s doprednou valutou |  |
-| Balances/ClosedLdgBal | amount | Zostatok po uzávierke, s pohybmi s doprednou valutou |  |
-| Balances/ActualClearBal | amount | Aktuálny zostatok, bez doprednej valuty |  |
-| Balances/ActualLdgBal | amount | Aktuálny zostatok, s doprednou valutou |  |
-| Balances/DispoClearBal | amount | Disponibilný zostatok, bez doprednej valuty | UC0504 |
-| Balances/DispoLdgBal | amount | Disponibilný zostatok, s doprednou valutou | UC0504 |
-| OverdraftLimit | amount | Výška povoleného prečerpania | UC0504 |
-| HeldAmount | amount | Výška zadržiavaných prostriedkov | UC0504 |
-| MinimumBalance | amount | Minimálny zostatok na účte | UC0504 |
-| OverdraftDetail/Preference | text (Y/N) | Má účet nastavenú preferenciu |  |
-| OverdraftDetail/OverDraftFlag | text (Y/N) | Balíkové voliteľné prečerpanie |  |
-| OverdraftDetail/PreferredLimit | amount | Preferovaná výška limitu voliteľného prečerpania |  |
-
-**Cashpool zostatky**
-
-| **Pole (AccDetail/CashpoolBalances/)** | **Typ** | **Popis** |
-| --- | --- | --- |
-| ClosedClearBal, ClosedLdgBal | amount | Zostatok po uzávierke (bez / s doprednou valutou) |
-| ActualClearBal, ActualLdgBal | amount | Aktuálny zostatok (bez / s doprednou valutou) |
-| DispoClearBal, DispoLdgBal | amount | Disponibilný zostatok (bez / s doprednou valutou) |
-
-**Sporiaca schéma (pri sporiacom účte)**
-
-| **Pole (AccDetail/SavingSchema/)** | **Typ** | **Popis** |
-| --- | --- | --- |
-| SavingSchemaFlag | string (Y/N) | Je aktívna sporiaca schéma |
-| SavingsMinTransfer | amount | Minimálna hodnota sporiaceho prevodu |
-| SavingsMaxTransfer | amount | Maximálna hodnota sporiaceho prevodu |
-| PosVolume | decimal | Percento objemu POS transakcií (max. 999,99 %) |
-| SavingsMinBalance | amount | Minimálny účtovný zostatok na BÚ po sporiacom prevode |
-| BalanceType | string | Typ zostatku: U = účtovný, D = disponibilný |
-| LastChangeDatetime | string | Dátum a čas poslednej zmeny schémy (counter pre AccountSavingSchemeAPI) |
-
-**Časové pečiatky**
-
-| **Pole (AccDetail/OfflineTimeStamps/)** | **Typ** | **Popis** |
-| --- | --- | --- |
-| LastAccountBalanceChange | dateTime | Dátum poslednej aktualizácie zostatku na bežnom účte |
-| LastBalanceChange | dateTime | Dátum poslednej aktualizácie zostatku v RTDS na ľubovoľnom bežnom účte |
-
-#### Zdrojové tabuľky lokálnej databázy CashBox
-
-| **Tabuľka** | **Stĺpce** | **Použitie v UC0401** |
-| --- | --- | --- |
-| `as400_values` | `is_online` boolean, `cbd` date | Overenie dostupnosti CBS v kroku 5 a vo vstupných podmienkach, vyhodnotenie AT2. Stĺpec `cbd` obsahuje aktuálny bankový deň |
-
-Poznámka: AS400 a CBS označujú ten istý centrálny bankový systém (potvrdil Matúš Radušovský). V texte UC sa používa pojem CBS, názvy technických objektov zostávajú nezmenené.
-
-#### Cieľové tabuľky
-
-UC0401 **do databázy nezapisuje**. Odpoveď rozhrania je držaná v kontexte transakcie a odovzdaná nadväzujúcim UC.
-
-#### Nadväznosť
-
-- **Vstup:** teller zadá číslo účtu vo formáte BBAN
-- **Súbežne:** UC0402 - Príprava - Overenie klienta (rieši osobu, nie účet, volá rozhranie GateGlobal)
-- **Výstup:** UC0403 - Príprava - Natypovanie transakcie, následne UC0404 - Príprava - Kontrola uskutočniteľnosti (vklady) alebo UC0504 - Príprava - Kontrola uskutočniteľnosti (výbery)
-- **Analogický UC:** UC0501 - Príprava - Overenie čísla účtu (výbery). Oba UC sú funkčne zhodné a treba ich udržiavať zosúladené
+| Druh zlyhania | Čo sa nezapísalo | Kde sa teller nachádza |
+|---|---|---|
+| Teller nevyplnil povinné polia | Nič, UC neprešiel do kroku 6 | V modálnom okne, tlačidlo Potvrdiť je neaktívne |
+| Zadaný údaj nemá správny formát (AT2) | Nič | V modálnom okne s vyznačeným chybným poľom |
+| Teller zrušil zadanie (AT1) | Nič | [OTVORENY BOD: viď AT1] |
+| ProductCBIAuthorizedSubjects je nedostupný (AT3) | Príznak vzťahu k účtu sa neuložil | Transakcia nemôže pokračovať |
 
 ---
 
-### Mapping
+## Opis obrazoviek + Validácie
+
+### Modálne okno Informácie o vkladateľovi
+
+Modálne okno sa zobrazuje nad obrazovkou transakcie. Na pozadí zostáva viditeľná obrazovka vkladu s poliami Číslo účtu BBAN, Mena, Variabilný symbol, Referencia platiteľa a Popis, ktoré rieši UC0403 - Príprava - Natypovanie transakcie, a karta s vypočítaným poplatkom za vklad, ktorú rieši UC0431 - Poplatok za vklad - Stanovenie výšky.
+
+Rozloženie polí je do troch stĺpcov. Zdroj: Figma mockup Informácie o vkladateľovi.
+
+M = Mandatory (Y = povinné, N = nepovinné), E = Editable (Y = editovateľné, N = read-only)
+
+| Názov | Dátový typ | Validácia | M | E | Popis |
+|---|---|---|---|---|---|
+| Priezvisko | Text | - | Y | Y | Priezvisko osoby podľa predloženého dokladu |
+| Meno | Text | - | Y | Y | Meno osoby podľa predloženého dokladu |
+| Titul | Text | - | N | Y | Titul pred menom |
+| Rodné číslo | Text | 9 až 10 miest | N | Y | Rodné číslo osoby, ak ho osoba má |
+| Dátum narodenia | Date (DD/MM/YYYY) | Formát DD/MM/YYYY, výber cez kalendár | Y | Y | Dátum narodenia |
+| Druh dokladu | Dropdown | Hodnoty z číselníka `id_card_type` | Y | Y | Druh dokladu, ktorý osoba fyzicky predložila |
+| Číslo dokladu | Text | - | Y | Y | Číslo predloženého dokladu |
+| Krajina vystavenia dokladu | Dropdown | Hodnoty z číselníka `ODS_SA.CCD_COUNTRY` | Y | Y | Krajina vystavenia predloženého dokladu |
+| CCAID | Text | - | N | Y | Identifikátor klienta v TB, ak je osoba klientom [OTVORENY BOD: odkiaľ teller hodnotu berie] |
+| CIF | Text | - | N | Y | Identifikátor CIF [OTVORENY BOD: odkiaľ teller hodnotu berie] |
+| PID | Text | - | N | Y | Identifikátor PID [OTVORENY BOD: odkiaľ teller hodnotu berie] |
+
+**Pozn. k dokladu totožnosti.** Údaje o doklade sa vždy vzťahujú na doklad, ktorý osoba fyzicky predložila, nie na doklad uložený v systéme banky. Systém ich z GateGlobal neodvodzuje ani nepredvypĺňa. Platí to rovnako pre klienta aj neklienta (potvrdil Feri).
+
+**Pozn. k rodnému číslu.** Pole je nepovinné, pretože ho cudzinci nemajú.
+
+### Tabuľka kontrol
+
+| # | Kontrola | Kde beží | Podmienka pre pokračovanie | Pri nesplnení | Testovateľné cez |
+|---|---|---|---|---|---|
+| 1 | Vyplnenie povinných polí | CashBox lokálne | Vyplnené sú priezvisko, meno, dátum narodenia, druh dokladu, číslo dokladu a krajina vystavenia dokladu | Tlačidlo Potvrdiť zostáva neaktívne, hláška sa nezobrazuje | Nechať prázdne pole Priezvisko a skúsiť potvrdiť |
+| 2 | Formát rodného čísla | CashBox lokálne | 9 až 10 miest, ak je pole vyplnené | AT2 | Zadať 8 alebo 11 znakov |
+| 3 | Formát dátumu narodenia | CashBox lokálne | Platný dátum vo formáte DD/MM/YYYY | AT2 | Zadať neplatný dátum |
+| 4 | Hodnota druhu dokladu | CashBox lokálne | Hodnota je z číselníka `id_card_type` | AT2 | Nevyberať z rozbaľovacieho zoznamu |
+| 5 | Hodnota krajiny vystavenia | CashBox lokálne | Hodnota je z číselníka `ODS_SA.CCD_COUNTRY` | AT2 | Nevyberať z rozbaľovacieho zoznamu |
+
+Všetky kontroly bežia lokálne v CashBoxe.
+
+### Správanie tlačidiel
+
+| Tlačidlo | Správanie |
+|---|---|
+| Potvrdiť | Neaktívne, kým nie sú vyplnené všetky povinné polia. Chybová hláška o nevyplnených povinných poliach sa nezobrazuje. Kontrola formátu prebieha až po kliknutí. [OTVORENY BOD: potvrdiť, navrhnuté podľa vzoru z UC0403] |
+| Zrušiť | Zatvorí modálne okno bez uloženia údajov, viď AT1 |
+| Krížik vpravo hore | [OTVORENY BOD: či robí to isté ako Zrušiť] |
+
+---
+
+## API
+
+### Rozhrania
+
+| Rozhranie | Verzia | Účel | Použitie v UC0407 |
+|---|---|---|---|
+| GateGlobal.ProductCBIAuthorizedSubjects | v4 | Zoznam oprávnených osôb k produktu spolu s typmi oprávnení | Zistenie vzťahu osoby k účtu v krokoch 8 a 9. [OTVORENY BOD: či sa v UC0407 volá] |
+| GateGlobal.CustomerCBIFind | v6.0 | Vyhľadanie klienta podľa identifikátorov | [OTVORENY BOD: podľa mockupu sa nepoužíva, viď otázka 1] |
+| GateGlobal.CustomerCBIDetail | v6.2 | Detail klienta | [OTVORENY BOD: podľa mockupu sa nepoužíva, viď otázka 1] |
+
+**Poznámka k verzii ProductCBIAuthorizedSubjects.** Používa sa verzia v4, ktorá je v Interface Specifications uvedená ako používaná. Verzia V5 prináša oproti v4 len možnosť identifikácie kartového produktu podľa identifikátora karty, čo CashBox nepotrebuje.
+
+### Číselníky
+
+| Zdroj | Tabuľka | Použitie v UC0407 |
+|---|---|---|
+| DB CashBox | `id_card_type` (`code` varchar(20), `description` varchar(20)) | Rozbaľovací zoznam Druh dokladu |
+| ODS | `ODS_SA.CCD_COUNTRY` | Rozbaľovací zoznam Krajina vystavenia dokladu |
+| GateGlobal | `CCD_ROLE_TYPE` | Typy oprávnení k produktu, vyhodnotenie vzťahu k účtu |
+
+### Vyhodnotenie vzťahu k účtu
+
+Zhodné s UC0402 - Príprava - Overenie klienta.
+
+Systém vyhodnotí, že osoba má vzťah k účtu, ak má k nemu aspoň jedno oprávnenie zaradené v konfiguračnom zozname oprávnení zakladajúcich vzťah k účtu. Zoznam sa napĺňa hodnotami z číselníka `CCD_ROLE_TYPE` a zodpovedá kategóriám Majiteľ (M), Konateľ (K), Vkladateľ (V) a Disponent (D) podľa UC0431 - Poplatok za vklad - Stanovenie výšky.
+
+Majiteľské oprávnenia systém rozpozná podľa aktívneho príznaku `IS_OWNER_FLAG` v číselníku `CCD_ROLE_TYPE`. Podľa podkladu k rozhraniu ide typicky o oprávnenia MAJ1_PV, MAJ2_PV a CIFM_PV.
+
+[OTVORENY BOD: zaradenie oprávnení pre kategórie Konateľ, Vkladateľ a Disponent]
+
+**Osobitosť UC0407.** Ak osoba nemá CCAID, nemá pridelený identifikátor subjektu a nemôže mať k účtu evidované oprávnenie. Systém v takom prípade uloží príznak, že osoba vzťah k účtu nemá, a rozhranie nevolá. [OTVORENY BOD: potvrdiť túto úvahu]
+
+### ProductCBIAuthorizedSubjects - parametre requestu
+
+| Objekt | Parameter | Hodnota z CashBoxu | Poznámka |
+|---|---|---|---|
+| RequestCVO | channel | [OTVORENY BOD: hodnota kanála. V CashBoxe existuje konštanta CASHBOX_GG_APPNAME] | Kanál musí byť registrovaný v konfigurácii služby, inak volanie skončí chybou ESBI102 |
+| RequestCVO | timestamp | Časová pečiatka správy | |
+| RequestCVO | version | v4 | |
+| RequestCVO | subversion | 0 | |
+| ProductAuthorizedSubjectsRequestCVO | brand | 001 (GATE TB) | 001 = GATE TB, 002 = SUN |
+| ProductAuthorizedSubjectsRequestCVO | productNumber/Account | IBAN účtu | IBAN je dotiahnutý v UC0401 - Príprava - Overenie čísla účtu |
+| ProductAuthorizedSubjectsRequestCVO | derivedRolesFlag | Neposiela sa | Aktívny príznak pri produkte z brandu RB (002) vedie k chybe ESBI105 |
+| ProductAuthorizedSubjectsRequestCVO | subjectIdentification | CCAID zadané tellerom | [OTVORENY BOD: čo sa pošle, ak teller CCAID nezadal] |
+
+### Chybové kódy rozhraní
+
+| Kód | Význam | Použitie v UC0407 |
+|---|---|---|
+| AUTH100 | Pre zadaný identifikátor neexistuje oprávnená osoba | Vyhodnotenie vzťahu k účtu, krok 9 |
+| ESBI102 | Zadaný kanál nie je súčasťou konfigurácie | Predpoklad volania služby |
+
+Ostatné chybové kódy nie sú predmetom tejto špecifikácie, platia podľa dokumentácie rozhraní.
+
+### Nadväznosť
+
+- **Predchádza:** UC0401 - Príprava - Overenie čísla účtu, ktorý overí číslo účtu a dotiahne IBAN
+- **Alternatíva k UC0407:** UC0402 - Príprava - Overenie klienta, ktorý sa vyvolá, ak teller prišiel preklikom z aplikácie GATE
+- **Výstup:** UC0403 - Príprava - Natypovanie transakcie, následne UC0404 - Príprava - Kontrola uskutočniteľnosti (vklady) alebo UC0504 (výbery). Príznak vzťahu k účtu využíva UC0431 - Poplatok za vklad - Stanovenie výšky
+
+---
 
 ## Mapping
 
 ### Uloženie údajov počas rozpracovanej transakcie
 
-UC0401 potrebuje odpoveď rozhrania sprístupniť nadväzujúcim UC bez opakovaného volania CBS. Podľa vývojára prichádzajú do úvahy dva spôsoby:
+UC0407 potrebuje zadané údaje sprístupniť nadväzujúcim UC. Podľa vývojára slúži na priebežné údaje transakcie pomocná tabuľka `deposit`, do ktorej sa postupne ukladajú údaje o klientovi, suma, kurz a ďalšie hodnoty. Údaje o osobe by patrili do stĺpca `depositor_info`.
 
-| Spôsob | Popis | Stav |
-|---|---|---|
-| Zápis do pomocnej tabuľky deposit | Tabuľka slúži ako cache pre priebežné údaje vkladu a výberu. Postupne sa do nej ukladajú údaje o klientovi, suma, kurz a ďalšie hodnoty, aby sa na konci neposielal jeden veľký request a aby bol priebeh bezpečnejší | Návrh vývojára, tabuľka nie je v aktuálnom dátovom modeli CashBox |
-| Držanie v pamäti aplikácie | Aplikácia si údaje dočasne pamätá počas rozpracovanej transakcie a nikam ich nezapisuje | Pôvodný predpoklad UC |
+Tabuľka `deposit` bola v staršej verzii dátového modelu CashBox. V aktuálnom modeli `cashbox_db.png` uvedená nie je.
 
-[OTVORENY BOD: ktorý zo spôsobov platí. Rozhodnutie ovplyvňuje aj UC0402 - Príprava - Overenie klienta a UC0403 - Príprava - Natypovanie transakcie, kde je uvedený rovnaký princíp. Téma na analytický meeting]
+[OTVORENY BOD: prečo tabuľka nie je v aktuálnom dátovom modeli a či sa do nej ukladajú aj údaje o osobe. Rovnaká otázka je otvorená v UC0401, UC0402 a UC0403]
 
-**Štruktúra tabuľky deposit podľa vývojára** (informatívne, tabuľka nie je v dátovom modeli):
+### Údaje zadané tellerom
 
-| Stĺpec | Typ | Poznámka k UC0401 |
-|---|---|---|
-| id | uuid | |
-| status | varchar(20) | Hodnoty DRAFT, DENOMINATIONS_SET, SUBMITTED, CANCELLED |
-| bban | bigint | Číslo účtu zadané tellerom v kroku 1 |
-| deposit_currency | char(3) | |
-| account_currency | char(3) | Mena účtu z odpovede rozhrania, atribút CurrencyCode |
-| deposit_currency_rate | numeric(20,10) | |
-| overridden_rate | numeric(20,10) | |
-| deposit_eur_rate | numeric(20,10) | |
-| amount | numeric(20,2) | |
-| fee_for_deposit_info | jsonb | |
-| coin_handling_fee_info | jsonb | |
-| fee_policy | varchar(20) | |
-| white_list_flag | boolean | |
-| performed_by | varchar(50) | |
-| created_at | timestamp | |
-| submitted_at | timestamp | |
-| transaction_sequence_number | integer | |
-| payment_details | jsonb | |
-| denominations_in | jsonb | |
-| denominations_out | jsonb | |
-| fee_coins_in | jsonb | |
-| fee_coins_out | jsonb | |
-| depositor_info | jsonb | |
-| account_info | jsonb | Pravdepodobné miesto pre odpoveď z AccountEnquiryEnterprise |
+Všetky údaje o osobe v UC0407 zadáva teller manuálne. Systém ich z externých rozhraní nedotiahne ani nepredvyplní.
 
-Poznámka vývojára: tabuľka je pomocná a funguje ako cache pre priebeh vkladu. Vývojár zároveň pripustil, že môže ísť len o dočasné držanie údajov v pamäti aplikácie bez zápisu do databázy.
+| Pole | Zdroj |
+|---|---|
+| Priezvisko, Meno, Titul | Teller podľa predloženého dokladu |
+| Rodné číslo | Teller, ak ho osoba má |
+| Dátum narodenia | Teller podľa predloženého dokladu |
+| Druh dokladu, Číslo dokladu, Krajina vystavenia dokladu | Teller podľa dokladu, ktorý osoba fyzicky predložila |
+| CCAID, CIF, PID | Teller [OTVORENY BOD: odkiaľ hodnoty berie] |
 
-### Cieľové tabuľky
+### Príznaky odovzdávané nadväzujúcim UC
 
-UC0401 do žurnálu ani do transakčných tabuliek nezapisuje. Zápis transakcie prebieha až v UC0417 - Realizácia - Zaúčtovanie transakcie po potvrdení zaúčtovania z CBS. Dôvod: teller môže transakciu kedykoľvek zrušiť alebo zmeniť číslo účtu, v takom prípade sa proces začína odznova od UC0401 a žiadne transakčné dáta nesmú zostať zapísané.
+| Príznak | Ako sa určí |
+|---|---|
+| Klient / Neklient | Podľa vyplnenia poľa CCAID |
+| Vzťah k účtu | Podľa odpovede rozhrania ProductCBIAuthorizedSubjects, krok 9 |
+
+**Mimo rozsah UC0407:**
+- Overenie osoby pri prekliku z GATE, rieši UC0402 - Príprava - Overenie klienta
+- Overovanie účtu, rieši UC0404 alebo UC0504
+- Vyhodnotenie whitelistu, rieši UC0404 alebo UC0504
+- Výpočet poplatku za vklad, rieši UC0431 - Poplatok za vklad - Stanovenie výšky
+- Údaje o právnickej osobe alebo FOP, [OTVORENY BOD: v ktorom UC sa riešia]
+
+---
+
+## Poznámky pre teba - nekopírovať do UC
+
+### Mockup zmenil pôvodnú predstavu z AT1
+
+V AT1 v UC0402 sme mali, že teller zadá identifikátor, zvolí **Vyhľadať**, systém zavolá CustomerCBIFind a potom CustomerCBIDetail.
+
+**V mockupe žiadne tlačidlo Vyhľadať nie je.** Modál vyzerá ako čisto manuálne vypĺňanie: teller zadá všetko a potvrdí.
+
+To si ale protirečí s Feriho vetou *"len pri klientovi vieme ostatné polia doplniť ako je rodné číslo, tituly atď"*. Ak sa nič nevyhľadáva, nemá to ako doplniť.
+
+Preto som hlavný tok napísal podľa mockupu, teda ako manuálne vypĺňanie, a otázku o vyhľadávaní dal ako **otázku číslo 1**, lebo od nej závisí celý tok. Ak sa potvrdí, že vyhľadávanie existuje, pribudnú kroky a dve rozhrania do sekcie API.
+
+Nechcel som to domyslieť, lebo by som napísal tok, ktorý nezodpovedá ani mockupu, ani Feriho vete.
+
+### Čo mockup naopak potvrdil
+
+| Vec | Zistenie |
+|---|---|
+| Tlačidlá | Zrušiť a Potvrdiť, plus krížik. Tým sa čiastočne uzatvára otázka, ktorú sme mali otvorenú aj v UC0402 |
+| Povinné polia | Priezvisko, Meno, Dátum narodenia, Druh dokladu, Číslo dokladu, Krajina vystavenia. Zhoduje sa s Feriho maticou |
+| Rodné číslo | Nepovinné, čo podporuje scenár s cudzincami |
+| CCAID, CIF, PID | **Na obrazovke sú** a vyzerajú ako editovateľné. Tým sa uzatvára otázka z UC0402, či sa vôbec zobrazujú |
+
+### Dôsledok pre UC0402
+
+Keďže mockup ukazuje CCAID, CIF a PID ako polia na obrazovke, do UC0402 by sa mali vrátiť do tabuľky polí. Odstránil som ich tam predtým, lebo v UC0450 je uvedené, že z prekliku pre vklad neprídu. Ale to znamená len to, že sa musia dotiahnuť z CustomerCBIDetail, nie že sa nezobrazujú.
+
+Navrhujem do matice v UC0402 doplniť tri riadky:
+
+```
+| CCAID | Text | - | N | Y | Identifikátor klienta v TB | `ccaId` | Preklik | - |
+| CIF | Text | - | N | Y | Identifikátor CIF | z prekliku nepríde | GateGlobal | - |
+| PID | Text | - | N | Y | Identifikátor PID | z prekliku nepríde | GateGlobal | - |
+```
+
+### Vlastníctvo UC0407
+
+V status súbore je UC0407 pridelený **Matejovi Pastuchovi** so stavom TODO. Ty si ho teraz napísal. Oplatí sa to s ním vyjasniť skôr, než na ňom začne pracovať aj on.
